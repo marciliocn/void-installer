@@ -31,6 +31,7 @@ clear
 echo '######################################'
 echo '######## Void Linux Installer ########'
 echo '######################################'
+echo ''
 
 # Explicitely declare our LV array (for LVM)
 # declare -A LV
@@ -117,16 +118,16 @@ sfdisk ${DEVNAME} <<-EOF
 EOF
 
 # FORMATING
-mkfs.vfat -F 32 -n EFI '${DEVNAME}1'
-mkswap -L swp0 '${DEVNAME}2'
-mkfs.xfs -f -L voidlinux '${DEVNAME}3'
+mkfs.vfat -F 32 -n EFI ${DEVNAME}1
+mkswap -L swp0 ${DEVNAME}2
+mkfs.xfs -f -L voidlinux ${DEVNAME}3
 
 # MOUNTING
-mount '${DEVNAME}3' /mnt
-mkdir /mnt/boot && mount '${DEVNAME}1' /mnt/boot
+mount ${DEVNAME}3 /mnt
+mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
 
 # When UEFI
-mkdir /mnt/boot/efi && mount '${DEVNAME}1' /mnt/boot/efi
+mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 ###### LVM AND CRYPTOGRAFY - START ######
 
