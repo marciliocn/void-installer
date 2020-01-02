@@ -223,7 +223,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
 # If UEFI installation, add packages related
-[ $UEFI ] && PKG_LIST='${PKG_LIST}-x86_64-efi'
+[ $UEFI ] && PKG_LIST="${PKG_LIST}-x86_64-efi"
 # if [ $UEFI ]; then
 #   PKG_LIST="$PKG_LIST grub-x86_64-efi efibootmgr"
 # else
@@ -236,13 +236,13 @@ CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
 # If GenuineIntel, add package for this architecture
 # [ '$CPU_VENDOR' == 'GenuineIntel' ] && PKG_LIST='${PKG_LIST} intel-ucode' - delete after some installations
 if [ '$CPU_VENDOR' = 'GenuineIntel' ]; then
-  xbps-install -Sy -r /mnt void-repo-nonfree
-  PKG_LIST='${PKG_LIST} intel-ucode'
+  xbps-install -S -y -r /mnt void-repo-nonfree
+  PKG_LIST="${PKG_LIST} intel-ucode"
 fi
 
 # Install Void Linux
 # xbps-install -Sy -R $REPO -r /mnt base-system $PKG_LIST
-env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST} # Optimize Repository Sync when GenuineIntel
+env XBPS_ARCH=x86_64-musl xbps-install -S -y -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST} # Optimize Repository Sync when GenuineIntel
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
