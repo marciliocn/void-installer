@@ -27,6 +27,11 @@
 # Exit immediately if a command exits with a non-zero exit status
 set -e
 
+clear
+echo '######################################'
+echo '######## Void Linux Installer ########'
+echo '######################################'
+
 # Explicitely declare our LV array (for LVM)
 # declare -A LV
 
@@ -57,7 +62,7 @@ PKG_LIST='grub'
 # Option to select the device type/name
 PS3='Select your device type/name: '
 options=('sda' 'sdb' 'nvme')
-select opt in '${options[@]}'
+select opt in "${options[@]}"
 do
   case $opt in
     'sda')
