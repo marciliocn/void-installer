@@ -1,6 +1,6 @@
 Void Linux Installer
 ---
-Alternative install script that replaces the standard Void Linux installer.
+Installer script as a alternative for default Void Linux installer.
 
 ### Features
 - Automated process installation for Void Linux UEFI MUSL
@@ -20,7 +20,7 @@ Alternative install script that replaces the standard Void Linux installer.
 - To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`
 
 ### INFOS
-- Tested only in VirtualBox
+- Tested only in VirtualBox and with UEFI MUSL
 - <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE.
 - The installation process running about 30 min.
 
