@@ -23,6 +23,7 @@
 # - Add /home as a cryptografied partition (only /boot and / are cryptografied). See void-install-uefi on Joplin
 # - Insert a for loop to open and crypto partitions (starting in "echo "[!] Encrypt boot partition"" line - like in "for FS in ${!LV[@]}; do" line)
 # - Option o install with local repository
+# - Update the DEVNAME process to choose with `lsblk | grep -a '^[^l][a-z]' | cut -d ' ' -f 1` (removing hard coded)
 
 # Exit immediately if a command exits with a non-zero exit status
 set -e
@@ -42,6 +43,7 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
+UPDATETYPE='-Sy' # If GenuineIntel update local repository, change the next one to only '-y'
 SWAP=1 # 1=On, 0=Off
 # Partitions Size
 EFISIZE='100M'
@@ -222,27 +224,27 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 ###### LVM AND CRYPTOGRAFY - END ######
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
-# If UEFI installation, add packages related
+# If UEFI installation, add GRUB specific package
 [ $UEFI ] && PKG_LIST="${PKG_LIST}-x86_64-efi"
-# if [ $UEFI ]; then
-#   PKG_LIST="$PKG_LIST grub-x86_64-efi efibootmgr"
-# else
-#   PKG_LIST="$PKG_LIST grub"
-# fi
 
 # Detect if we're on an Intel system
 CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
 
-# If GenuineIntel, add package for this architecture
-# [ '$CPU_VENDOR' == 'GenuineIntel' ] && PKG_LIST='${PKG_LIST} intel-ucode' - delete after some installations
-if [ '$CPU_VENDOR' = 'GenuineIntel' ]; then
-  xbps-install -Sy -r /mnt void-repo-nonfree
+# If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST and update the xbps-install type for installation
+if [ '$CPU_VENDOR' == 'GenuineIntel' ]; then
+  clear
+  echo ''
+  echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
+  xbps-install ${UPDATETYPE} -r /mnt void-repo-nonfree
   PKG_LIST="${PKG_LIST} intel-ucode"
+  UPDATETYPE='-y'
 fi
 
 # Install Void Linux
-# xbps-install -Sy -R $REPO -r /mnt base-system $PKG_LIST
-env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST} # Optimize Repository Sync when GenuineIntel
+clear
+echo ''
+echo 'Installing Void Linux files.'
+env XBPS_ARCH=x86_64-musl xbps-install ${UPDATETYPE} -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST}
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
@@ -254,18 +256,20 @@ cp -L /etc/resolv.conf /mnt/etc/
 ######################
 ### CHROOTed START ###
 ######################
-# chroot /mnt bash -il
 clear
+echo ''
 echo 'Set Root Password'
 # create the password for the root user
 chroot /mnt passwd root
 
 clear
+echo ''
 echo 'Adjust/Correct Root Permissions'
 chroot /mnt chown root:root /
 chroot /mnt chmod 755 /
 
 clear
+echo ''
 echo 'Customizations'
 # customization
 echo $HOSTNAME > /mnt/etc/hostname
@@ -310,6 +314,7 @@ echo 'TTYS=2' >> /mnt/etc/rc.conf
 ##########################
 
 clear
+echo ''
 echo 'FSTAB'
 ###############################
 #### FSTAB ENTRIES - START ####
@@ -363,6 +368,7 @@ echo 'LABEL=swp0  swap  swap  defaults    0 0' >> /mnt/etc/fstab
 # echo "GRUB_CMDLINE_LINUX=\"rd.vconsole.keymap=${KEYMAP} rd.lvm=1 rd.luks=1 rd.luks.allow-discards rd.luks.uuid=${LUKS_BOOT_UUID} rd.luks.uuid=${LUKS_DATA_UUID}\"" >> /mnt/etc/default/grub
 
 clear
+echo ''
 echo 'Install GRUB'
 # Install GRUB to the disk
 chroot /mnt grub-install ${DEVNAME}
@@ -373,16 +379,19 @@ chroot /mnt grub-install ${DEVNAME}
 # chroot /mnt grub-mkconfig -o /mnt/boot/grub/grub.cfg
 
 clear
+echo ''
 echo 'Read the newest kernel'
 # Cat the Linux Kernel Version and Reconfigure
 KERNEL_VER=$(chroot /mnt xbps-query -s 'linux[0-9]*' | cut -f 2 -d ' ' | cut -f 1 -d -)
 
 clear
+echo ''
 echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f ${KERNEL_VER}
 
 clear
+echo ''
 echo 'Correct the grub install'
 chroot /mnt update-grub
 
@@ -416,5 +425,10 @@ chroot /mnt update-grub
 
 umount -R /mnt
 
-echo "*** Void Linux Installed Successfully! ***"
+clear
+echo ''
+echo '####################################################'
+echo '######## Void Linux Installed Successfully! ########'
+echo '####################################################'
+
 poweroff

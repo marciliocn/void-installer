@@ -22,7 +22,7 @@ Installer script as a alternative for default `void-installer`.
 ### INFOS
 - Tested only in VirtualBox and with UEFI MUSL
 - <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE.
-- The installation process running about 30 min.
+- The installation process running about 15 min.
 
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
