@@ -1,15 +1,15 @@
 Void Linux Installer
 ---
-Installer script as a alternative for default Void Linux installer.
+Installer script as a alternative for default `void-installer`.
 
-### Features
+### FEATURES
 - Automated process installation for Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
 - Doesn't set up a common user
 - Formating `/` with `xfs filesystem`
 - With GRUB
 
-### Usage
+### USAGE
 - Boot from Void Linux Live Image with a DE (Desktop Environment)
 - Open terminal and install Git: `sudo xbps-install -Sy git`<sup>1</sup>
 - `git clone http://github.com/marciliocn/void-installer`
@@ -26,7 +26,10 @@ Installer script as a alternative for default Void Linux installer.
 
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
-- Create a pos-install script for automate tuning and another configs
+- Add a pos-install script for automate tuning and another configs
+- Automatic answer for import keys
+- Include `rEFInd`
+- Option to install without GRUB or UEFI (on Arch it is possible)
 
 ### CHANGELOG
 #### Version 201901.01

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name: Void Linux Installer
-# Authors: Marcílio Nascimento
+# Authors: Marcílio Nascimento <marcilio.mcn at gmail.com>
 # Date: 2019, March
 # Description: Alternative install script that replaces the standard Void Linux installer.
 # License: MIT
@@ -9,11 +9,11 @@
 # Changelog: 
 
 # TODO:
-# - Finish installation glibc crypto with lvm
 # - Finish installation musl full crypto with lvm (LUKS + LVM) (encryption for both `boot` and `root` partitions)
 # - Include /home partition in MBR installation
 # - Comparing partitions size from MB and KB (choose the best representative - in KB, necessary conversion)
-# - Change to sh indeed bash
+# - Teste changing to sh indeed bash (on shebang)
+# - Finish installation glibc crypto with lvm
 # - Validate with glibc and musl installation
 # - Add flag to crypt or normal installation
 # - Include brazilian portuguese language option (and both with International English)
@@ -236,13 +236,13 @@ CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
 # If GenuineIntel, add package for this architecture
 # [ '$CPU_VENDOR' == 'GenuineIntel' ] && PKG_LIST='${PKG_LIST} intel-ucode' - delete after some installations
 if [ '$CPU_VENDOR' = 'GenuineIntel' ]; then
-  xbps-install -S -y -r /mnt void-repo-nonfree
+  xbps-install -Sy -r /mnt void-repo-nonfree
   PKG_LIST="${PKG_LIST} intel-ucode"
 fi
 
 # Install Void Linux
 # xbps-install -Sy -R $REPO -r /mnt base-system $PKG_LIST
-env XBPS_ARCH=x86_64-musl xbps-install -S -y -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST} # Optimize Repository Sync when GenuineIntel
+env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST} # Optimize Repository Sync when GenuineIntel
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
