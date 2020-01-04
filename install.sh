@@ -227,25 +227,19 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
 # If UEFI installation, add GRUB specific package
-[ $UEFI ] && PKG_LIST="${PKG_LIST}-x86_64-efi"
+[ $UEFI ] && PKG_LIST='${PKG_LIST}-x86_64-efi'
 
 # Detect if we're on an Intel system
 CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
-
-clear
-echo ''
-echo 'Arquitetura: '$CPU_VENDOR
-echo 'Pacotes: '$PKG_LIST
-sleep 10
 
 # If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST and update the xbps-install type for installation
 if [ $CPU_VENDOR == 'GenuineIntel' ]; then
   clear
   echo ''
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
-  echo 'xbps-install $UPDATETYPE -r /mnt void-repo-nonfree'
+  echo xbps-install '$UPDATETYPE' -r /mnt void-repo-nonfree
   sleep 10
-  xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
+  xbps-install '$UPDATETYPE' -r /mnt void-repo-nonfree
   PKG_LIST='$PKG_LIST intel-ucode'
   UPDATETYPE='-y'
   sleep 10
