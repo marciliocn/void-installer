@@ -227,7 +227,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
 # If UEFI installation, add GRUB specific package
-[ $UEFI ] && PKG_LIST='${PKG_LIST}-x86_64-efi'
+[ $UEFI ] && PKG_LIST+='-x86_64-efi'
 
 # Detect if we're on an Intel system
 CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
@@ -241,7 +241,7 @@ if [ $CPU_VENDOR == 'GenuineIntel' ]; then
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
   echo xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
   sleep 5
-  env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt void-repo-nonfree || echo 'Falhou'
+  env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt void-repo-nonfree
   PKG_LIST+=' intel-ucode'
   echo 'Pacotes dentro: '$PKG_LIST
   sleep 6
