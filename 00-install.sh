@@ -38,8 +38,8 @@ echo ''
 # declare -A LV
 
 # Declare constants and variables
-# REPO="http://alpha.us.repo.voidlinux.org/current"
-REPO='http://mirror.clarkson.edu/voidlinux'
+REPO="http://alpha.us.repo.voidlinux.org"
+# REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
@@ -60,7 +60,7 @@ HARDWARECLOCK='UTC' # Set RTC to UTC or localtime.???
 KEYMAP='us' # Include another options here
 TIMEZONE='America/Sao_Paulo'
 LANG='en_US.UTF-8'
-PKG_LIST='grub'
+PKG_LIST='base-system git grub'
 
 # Option to select the device type/name
 PS3='Select your device type/name: '
@@ -233,7 +233,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 clear
 echo ''
 echo 'Installing Void Linux files.'
-env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt base-system $PKG_LIST
+env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt $PKG_LIST
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
@@ -382,7 +382,7 @@ chroot /mnt xbps-reconfigure -f $KERNEL_VER
 clear
 echo ''
 echo 'Active DHCP deamon for enable network connection on next boot.'
-chroot /mnt ln -s /etc/sv/dhcpcd /var/service
+ln -s /mnt/etc/sv/dhcpcd /mnt/var/service
 
 clear
 echo ''
