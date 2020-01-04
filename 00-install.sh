@@ -38,8 +38,8 @@ echo ''
 # declare -A LV
 
 # Declare constants and variables
-REPO="http://alpha.us.repo.voidlinux.org"
-# REPO='http://mirror.clarkson.edu/voidlinux'
+# REPO="http://alpha.us.repo.voidlinux.org"
+REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
@@ -379,10 +379,10 @@ echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
-clear
-echo ''
-echo 'Active DHCP deamon for enable network connection on next boot.'
-ln -s /mnt/etc/sv/dhcpcd /mnt/var/service
+# clear
+# echo ''
+# echo 'Active DHCP deamon for enable network connection on next boot.'
+# ln -s /mnt/etc/sv/dhcpcd /mnt/var/service
 
 clear
 echo ''
