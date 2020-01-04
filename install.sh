@@ -238,13 +238,13 @@ sleep 6
 
 # If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST and update the xbps-install type for installation
 if [ $CPU_VENDOR == 'GenuineIntel' ]; then
-  clear
+  # clear
   echo ''
   echo 'Parameters dentro: '$UPDATETYPE
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
   echo xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
   sleep 10
-  xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
+  env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
   PKG_LIST='$PKG_LIST intel-ucode'
   echo 'Pacotes dentro: '$PKG_LIST
   sleep 6
