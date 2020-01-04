@@ -80,7 +80,9 @@ do
       DEVNAME='/dev/nvme'
       break
       ;;
-    *) echo 'The option $opt is invalid.';;
+    *)
+      echo 'This option is invalid.'
+      ;;
   esac
 done
 
@@ -233,16 +235,20 @@ CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
 clear
 echo ''
 echo 'Arquitetura: '$CPU_VENDOR
-sleep 3
+echo 'Pacotes: '$PKG_LIST
+sleep 10
 
 # If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST and update the xbps-install type for installation
 if [ $CPU_VENDOR == 'GenuineIntel' ]; then
   clear
   echo ''
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
+  echo 'xbps-install $UPDATETYPE -r /mnt void-repo-nonfree'
+  sleep 10
   xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
   PKG_LIST='$PKG_LIST intel-ucode'
   UPDATETYPE='-y'
+  sleep 10
 fi
 
 # Install Void Linux
