@@ -240,9 +240,9 @@ if [ $CPU_VENDOR == 'GenuineIntel' ]; then
   echo 'Parameters dentro: '$UPDATETYPE
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
   echo xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
-  sleep 10
-  sudo env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -r /mnt void-repo-nonfree || echo 'Falhou'
-  PKG_LIST='${PKG_LIST} intel-ucode'
+  sleep 5
+  env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt void-repo-nonfree || echo 'Falhou'
+  PKG_LIST+=' intel-ucode'
   echo 'Pacotes dentro: '$PKG_LIST
   sleep 6
   UPDATETYPE='-y'
