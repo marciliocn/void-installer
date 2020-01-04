@@ -14,8 +14,8 @@ Installer script as a alternative for default `void-installer`.
 - Open terminal and install Git: `sudo xbps-install -Sy git`<sup>1</sup>
 - `git clone http://github.com/marciliocn/void-installer`
 - `cd void-installer`
-- Edit the header of `install.sh` to your taste
-- `sudo ./install.sh`
+- Edit the header of `00-install.sh` to your taste
+- `sudo ./00-install.sh`
 - Eject the installation media from drive and boot the machine
 - To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`
 

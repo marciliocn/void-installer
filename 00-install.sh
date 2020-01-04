@@ -43,7 +43,7 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
-UPDATETYPE='-Sy' # If GenuineIntel update local repository, change the next one to only '-y'
+# UPDATETYPE='-Sy' # If GenuineIntel update local repository and change the next one to only '-y'
 SWAP=1 # 1=On, 0=Off
 # Partitions Size
 EFISIZE='100M'
@@ -229,32 +229,11 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # If UEFI installation, add GRUB specific package
 [ $UEFI ] && PKG_LIST+='-x86_64-efi'
 
-# Detect if we're on an Intel system
-CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
-
-# If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST 
-# and update the xbps-install type for installation
-if [ $CPU_VENDOR == 'GenuineIntel' ]; then
-  # clear
-  echo ''
-  echo 'Parameters dentro: '$UPDATETYPE
-  echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
-  echo xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
-  sleep 5
-  env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt void-repo-nonfree
-  PKG_LIST+=' intel-ucode'
-  echo 'Pacotes dentro: '$PKG_LIST
-  sleep 6
-  UPDATETYPE='-y'
-  echo 'Parameters final: '$UPDATETYPE
-  sleep 10
-fi
-
 # Install Void Linux
 clear
 echo ''
 echo 'Installing Void Linux files.'
-env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt base-system $PKG_LIST
+env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt base-system $PKG_LIST
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
