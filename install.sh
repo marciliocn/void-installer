@@ -80,7 +80,7 @@ do
       DEVNAME='/dev/nvme'
       break
       ;;
-    *) echo 'The option "$opt" is invalid.';;
+    *) echo 'The option $opt is invalid.';;
   esac
 done
 
