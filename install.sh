@@ -386,7 +386,7 @@ chroot /mnt grub-install $DEVNAME
 clear
 echo ''
 echo 'Read the newest kernel'
-# Cat the Linux Kernel Version and Reconfigure
+# Cat the Linux Kernel Version
 KERNEL_VER=$(chroot /mnt xbps-query -s 'linux[0-9]*' | cut -f 2 -d ' ' | cut -f 1 -d -)
 
 clear
@@ -394,6 +394,11 @@ echo ''
 echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
+
+clear
+echo ''
+echo 'Active DHCP deamon for enable network connection on next boot.'
+chroot /mnt ln -s /etc/sv/dhcpcd /var/service
 
 clear
 echo ''
