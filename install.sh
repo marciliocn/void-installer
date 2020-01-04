@@ -80,7 +80,7 @@ do
       DEVNAME='/dev/nvme'
       break
       ;;
-    *) echo 'The option "$REPLY" is invalid.';;
+    *) echo 'The option "$opt" is invalid.';;
   esac
 done
 
@@ -112,7 +112,7 @@ done
 ###### PARTITIONS - END ######
 
 # PARTITIONS
-sfdisk ${DEVNAME} <<-EOF
+sfdisk $DEVNAME <<-EOF
   label: gpt
   ,$EFISIZE,U,*
   ,$SWAPSIZE,S
@@ -232,16 +232,16 @@ CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | uniq | awk '{print $3}')
 
 clear
 echo ''
-echo 'Aquitetura: $CPU_VENDOR'
+echo 'Arquitetura: '$CPU_VENDOR
 sleep 3
 
 # If GenuineIntel, install void-repo-nonfree, add package for this architecture in $PKG_LIST and update the xbps-install type for installation
-if [ ${CPU_VENDOR} == 'GenuineIntel' ]; then
+if [ $CPU_VENDOR == 'GenuineIntel' ]; then
   clear
   echo ''
   echo 'Detected GenuineIntel Arch. Adding new repo and Package to install.'
-  xbps-install ${UPDATETYPE} -r /mnt void-repo-nonfree
-  PKG_LIST="${PKG_LIST} intel-ucode"
+  xbps-install $UPDATETYPE -r /mnt void-repo-nonfree
+  PKG_LIST='$PKG_LIST intel-ucode'
   UPDATETYPE='-y'
 fi
 
@@ -249,7 +249,7 @@ fi
 clear
 echo ''
 echo 'Installing Void Linux files.'
-env XBPS_ARCH=x86_64-musl xbps-install ${UPDATETYPE} -R ${REPO}/current/musl -r /mnt base-system ${PKG_LIST}
+env XBPS_ARCH=x86_64-musl xbps-install $UPDATETYPE -R ${REPO}/current/musl -r /mnt base-system $PKG_LIST
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
 mount -t proc proc /mnt/proc
@@ -278,8 +278,8 @@ echo ''
 echo 'Customizations'
 # customization
 echo $HOSTNAME > /mnt/etc/hostname
-echo 'TIMEZONE="${TIMEZONE}"' >> /mnt/etc/rc.conf
-echo 'KEYMAP="${KEYMAP}"' >> /mnt/etc/rc.conf
+echo 'TIMEZONE="$TIMEZONE"' >> /mnt/etc/rc.conf
+echo 'KEYMAP="$KEYMAP"' >> /mnt/etc/rc.conf
 echo 'TTYS=2' >> /mnt/etc/rc.conf
 
 
@@ -376,7 +376,7 @@ clear
 echo ''
 echo 'Install GRUB'
 # Install GRUB to the disk
-chroot /mnt grub-install ${DEVNAME}
+chroot /mnt grub-install $DEVNAME
 
 # clear
 # echo "Configurar GRUB"
@@ -393,7 +393,7 @@ clear
 echo ''
 echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
-chroot /mnt xbps-reconfigure -f ${KERNEL_VER}
+chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
 clear
 echo ''
