@@ -34,22 +34,24 @@ echo '######## Void Linux Installer ########'
 echo '######################################'
 echo ''
 
-# Explicitely declare our LV array (for LVM)
+# Declaring LV array (for LVM)
 # declare -A LV
 
 # Declare constants and variables
+UEFI=0 # 1=UEFI, 0=Legacy/BIOS platform along the script
 # REPO="http://alpha.us.repo.voidlinux.org"
 REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
 # UPDATETYPE='-Sy' # If GenuineIntel update local repository and change the next one to only '-y'
-SWAP=1 # 1=On, 0=Off
-# Partitions Size
+# SWAP=1 # 1=On, 0=Off
+# PARTITIONS SIZE
 EFISIZE='100M'
 SWAPSIZE='1G'
-BOOTSIZE='512M' # 512MB for /boot should be sufficient to host 7 to 8 kernel versions
-ROOTSIZE='5G'
+# BOOTSIZE='512M' # 512MB for /boot should be sufficient to host 7 to 8 kernel versions
+# ROOTSIZE='5G'
+
 # LVM Size ARRAY (testing)
 # LV[root]="2G"
 # LV[var]="2G" - Test if necessary for desktop
@@ -59,7 +61,7 @@ HOSTNAME='gladiator' # pick your favorite name
 HARDWARECLOCK='UTC' # Set RTC to UTC or localtime.???
 KEYMAP='us' # Include another options here
 TIMEZONE='America/Sao_Paulo'
-LANG='en_US.UTF-8'
+LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system git grub'
 
 # Option to select the device type/name
@@ -86,7 +88,7 @@ do
   esac
 done
 
-# Wipe /dev/${DEVNAME} (return this when the installation process is working)
+# Wipe /dev/${DEVNAME} (return this and test when the installation process is working)
 #dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
 
 # Detect if we're in UEFI or legacy mode installation
@@ -95,7 +97,7 @@ done
 ###### PARTITIONS - START ######
 # Device Paritioning for UEFI/GPT or BIOS/MBR
 # if [ $UEFI ]; then
-#   sfdisk /dev/sda <<-EOF
+#   sfdisk $DEVNAME <<-EOF
 #     label: gpt
 #     ,$EFISIZE,U,*
 #     ,$SWAPSIZE,S
@@ -104,22 +106,25 @@ done
 #     ,,L
 #   EOF
 # else
-#   sfdisk /dev/sda <<-EOF
+#   sfdisk $DEVNAME <<-EOF
 #     label: dos
 #     ,$SWAPSIZE,S
 #     ,$BOOTSIZE,L,*
 #     ,,L
 #   EOF
 # fi
-###### PARTITIONS - END ######
 
-# PARTITIONS
+# Convert size of partitions to KB
+EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
+SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
+
 sfdisk $DEVNAME <<-EOF
   label: gpt
-  ,$EFISIZE,U,*
-  ,$SWAPSIZE,S
+  ,${EFISIZE}K,U,*
+  ,${SWAPSIZE}K,S
   ,,L
 EOF
+###### PARTITIONS - END ######
 
 # FORMATING
 mkfs.vfat -F 32 -n EFI ${DEVNAME}1
@@ -133,7 +138,7 @@ mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
 # When UEFI
 mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
-###### LVM AND CRYPTOGRAFY - START ######
+###### LVM AND CRYPTOGRAPHY - START ######
 
 # # Options for encrypt partitions process
 # if [ $UEFI ]; then
@@ -147,7 +152,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # # Start PKG_LIST variable and increase packages by the process installation
 # PKG_LIST="lvm2 cryptsetup"
 
-# # Install requirements for LVM and Cryptografy
+# # Install requirements for LVM and Cryptography
 # xbps-install -Syf $PKG_LIST
 
 # echo "Encrypt - boot partition"
@@ -223,7 +228,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # mkdir -p /mnt/var/db/xbps/keys/
 # cp -a /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 
-###### LVM AND CRYPTOGRAFY - END ######
+###### LVM AND CRYPTOGRAPHY - END ######
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
 # If UEFI installation, add GRUB specific package
