@@ -12,8 +12,8 @@ Installer script as a alternative for default `void-installer`.
 
 ### USAGE
 - Boot from Void Linux Live Image with a DE (Desktop Environment)
-- Open terminal and install Git: `sudo xbps-install -Sy git`<sup>1</sup>
-- `git clone http://github.com/marciliocn/void-installer`
+- Open terminal and install `git`: `sudo xbps-install -Sy git`<sup>1</sup>
+- `sudo git clone http://github.com/marciliocn/void-installer`
 - `cd void-installer`
 - Edit the header of `00-install.sh` to your taste
 - `sudo ./00-install.sh`

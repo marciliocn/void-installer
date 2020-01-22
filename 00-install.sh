@@ -43,8 +43,8 @@ echo ''
 
 # Declare constants and variables
 UEFI=0 # 1=UEFI, 0=Legacy/BIOS platform along the script
-REPO="http://alpha.us.repo.voidlinux.org"
-# REPO='http://mirror.clarkson.edu/voidlinux'
+# REPO="http://alpha.us.repo.voidlinux.org"
+REPO='http://mirror.clarkson.edu/voidlinux'
 #DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
@@ -122,7 +122,7 @@ done
 EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
 SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
 
-sfdisk $DEVNAME <<-EOF
+sfdisk $DEVNAME <<EOF
   label: gpt
   ,${EFISIZE}K,U,*
   ,${SWAPSIZE}K,S
@@ -298,16 +298,24 @@ echo 'TTYS=2' >> /mnt/etc/rc.conf
 
 clear
 echo ''
-echo 'FSTAB'
+echo 'Generating /etc/fstab'
 ###############################
 #### FSTAB ENTRIES - START ####
 ###############################
 #
 # echo "<file system> <dir> <type>  <options>   <dump>  <pass>" >> /mnt/etc/fstab
-echo 'tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0' >> /mnt/etc/fstab
-echo 'LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2' >> /mnt/etc/fstab
-echo 'LABEL=voidlinux / xfs rw,relatime,discard 0 1' >> /mnt/etc/fstab
-echo 'LABEL=swp0  swap  swap  defaults    0 0' >> /mnt/etc/fstab
+# echo 'tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0' >> /mnt/etc/fstab
+# echo 'LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2' >> /mnt/etc/fstab
+# echo 'LABEL=voidlinux / xfs rw,relatime,discard 0 1' >> /mnt/etc/fstab
+# echo 'LABEL=swp0  swap  swap  defaults    0 0' >> /mnt/etc/fstab
+
+# tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0 - excluir se em uma instalação limpa já tiver essa linha no fstab
+
+cat > /mnt/etc/fstab <<EOF
+LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+LABEL=voidlinux / xfs rw,relatime,discard 0 1
+LABEL=swp0  swap  swap  defaults    0 0
+EOF
 
 # For a removable drive I include the line:
 # LABEL=volume  /media/blahblah xfs rw,relatime,nofail 0 0
@@ -374,15 +382,15 @@ echo 'Reconfigure initramfs'
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
 ### DHCP & SSH START ###
-# clear
-# echo ''
-# echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
-# cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
-# ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
-# ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
-# EOCHROOT
+clear
+echo ''
+echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
+cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
+ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
+ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+EOCHROOT
 
-# chroot /mnt /bin/sh /tmp/bootstrap.sh
+chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### DHCP & SSH END ###
 
 clear
