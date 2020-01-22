@@ -309,9 +309,8 @@ echo 'Generating /etc/fstab'
 # echo 'LABEL=voidlinux / xfs rw,relatime,discard 0 1' >> /mnt/etc/fstab
 # echo 'LABEL=swp0  swap  swap  defaults    0 0' >> /mnt/etc/fstab
 
-# tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0 - excluir se em uma instalação limpa já tiver essa linha no fstab
-
 cat > /mnt/etc/fstab <<EOF
+tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0
 LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
 LABEL=voidlinux / xfs rw,relatime,discard 0 1
 LABEL=swp0  swap  swap  defaults    0 0
