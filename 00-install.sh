@@ -389,6 +389,16 @@ chroot /mnt xbps-reconfigure -f $KERNEL_VER
 # echo 'Active DHCP deamon for enable network connection on next boot.'
 # ln -s /mnt/etc/sv/dhcpcd /mnt/var/service
 
+# clear
+# echo ''
+# echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
+cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
+ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
+ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+EOCHROOT
+
+chroot /mnt /bin/sh /tmp/bootstrap.sh
+
 clear
 echo ''
 echo 'Correct the grub install'
