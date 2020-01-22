@@ -7,6 +7,10 @@
 # License: MIT
 # Version: 
 # Changelog: 
+# 202001.01
+# - Added activation for DHCP and SSH server deamons
+# 201901.01
+# - MVP for installer, without cryptography
 
 # TODO:
 # - Finish installation musl full crypto with lvm (LUKS + LVM) (encryption for both `boot` and `root` partitions)
@@ -19,8 +23,8 @@
 # - Include brazilian portuguese language option (and both with International English)
 # - Add TXT files with Keymaps, Timezone, Lang, etc....in root directory as reference
 # - Option to scape partitioning and formating device
-# - Verifiy if SWAP is cryptografied (see https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption)
-# - Add /home as a cryptografied partition (only /boot and / are cryptografied). See void-install-uefi on Joplin
+# - Verifiy if SWAP is cryptographied (see https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption)
+# - Add /home as a cryptographied partition (only /boot and / are cryptografied). See void-install-uefi on Joplin
 # - Insert a for loop to open and crypto partitions (starting in "echo "[!] Encrypt boot partition"" line - like in "for FS in ${!LV[@]}; do" line)
 # - Option o install with local repository
 # - Update the DEVNAME process to choose with `lsblk | grep -a '^[^l][a-z]' | cut -d ' ' -f 1` (removing hard coded)
@@ -288,21 +292,6 @@ echo 'TTYS=2' >> /mnt/etc/rc.conf
 # chroot /mnt xbps-reconfigure -f glibc-locales
 # OLD CONFIGS
 
-
-# cat >$ROOT/tmp/bootstrap.sh <<-EOCHROOT
-# . /etc/profile
-# sed -i 's/^#en_US/en_US/' /etc/default/libc-locales
-# echo "root:$RPASSWD"|chpasswd -c SHA512
-# xbps-reconfigure -f glibc-locales
-# xbps-install -R $REPO -Sy base-system grub $EXTRAS
-# [ -d /boot/grub ] || mkdir -p /boot/grub
-# grub-mkconfig > /boot/grub/grub.cfg
-# grub-install $DEV
-# ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
-# ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
-# EOCHROOT
-
-# chroot $ROOT /bin/sh /tmp/bootstrap.sh
 ##########################
 #### GLIBC ONLY - END ####
 ##########################
@@ -384,20 +373,17 @@ echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
-# clear
-# echo ''
-# echo 'Active DHCP deamon for enable network connection on next boot.'
-# ln -s /mnt/etc/sv/dhcpcd /mnt/var/service
-
-# clear
-# echo ''
-# echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
+### DHCP & SSH START ###
+clear
+echo ''
+echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 EOCHROOT
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
+### DHCP & SSH END ###
 
 clear
 echo ''

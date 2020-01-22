@@ -8,6 +8,7 @@ Installer script as a alternative for default `void-installer`.
 - Doesn't set up a common user
 - Formating `/` with `xfs filesystem`
 - With GRUB
+- Enable automatically DHCP and SSH server deamons (and internet work on next reboot)
 
 ### USAGE
 - Boot from Void Linux Live Image with a DE (Desktop Environment)
@@ -17,20 +18,27 @@ Installer script as a alternative for default `void-installer`.
 - Edit the header of `00-install.sh` to your taste
 - `sudo ./00-install.sh`
 - Eject the installation media from drive and boot the machine
-- To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`
+- ~~To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`~~
+- Enjoy ;)
 
 ### INFOS
-- Tested only in VirtualBox and with UEFI MUSL
-- <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE.
-- The installation process running about 15 min.
+- Tested only:
+	- VirtualBox Machine
+	- With UEFI MUSL
+	- Arch x86_64
+- <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE
+- The installation process running about 15 min
 
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
 - Add a pos-install script for automate tuning and another configs
-- Automatic answer for import keys
+- Add a option to choose filesystem for partitions
+- Automatic answer for import keys (from repository http://mirror.clarkson.edu/voidlinux)
 - Include `rEFInd`
-- Option to install without GRUB or UEFI (on Arch it is possible)
+- Option to install without `GRUB` or `UEFI` (on Arch it is possible)
 
 ### CHANGELOG
-#### Version 201901.01
+#### 202001.01
+- Added activation for DHCP and SSH server deamons
+#### 201901.01
 - MVP for installer, without cryptography
