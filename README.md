@@ -32,7 +32,7 @@ Installer script as a alternative for default `void-installer`.
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
 - Add a pos-install script for automate tuning and another configs
-- Add a option to choose filesystem for partitions
+- Add a option to choose filesystem for partitions (don't forget to change in fstab too)
 - Automatic answer for import keys (from repository http://mirror.clarkson.edu/voidlinux)
 - Include `rEFInd`
 - Option to install without `GRUB` or `UEFI` (on Arch it is possible)
