@@ -398,26 +398,32 @@ ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
 useradd -g users -G wheel,storage $USERNAME
+echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
 passwd $USERNAME
 
-cp /etc/sudoers /tmp/sudoers
-sed -e 's/^# %wheel ALL=(ALL) ALL/\
-        %wheel ALL=(ALL) ALL, NOPASSWD: \
-        \/usr\/bin\/halt, \
-        \/usr\/bin\/poweroff, \
-        \/usr\/bin\/reboot, \
-        \/usr\/bin\/shutdown, \
-        \/usr\/bin\/zzz, \
-        \/usr\/bin\/ZZZ, \
-        \/usr\/bin\/mount, \
-        \/usr\/bin\/umount/' /tmp/sudoers
-cp /tmp/sudoers /etc/sudoers
+visudo <<EOF
+:%s/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL, NOPASSWD: \/usr\/bin\/halt, \/usr\/bin\/poweroff, \/usr\/bin\/reboot, \/usr\/bin\/shutdown, \/usr\/bin\/zzz, \/usr\/bin\/ZZZ, \/usr\/bin\/mount, \/usr\/bin\/umount/g
+:wq
+EOF
 
 mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
 EOCHROOT
+
+# cp /etc/sudoers /tmp/sudoers
+# sed -e 's/^# %wheel ALL=(ALL) ALL/\
+#         %wheel ALL=(ALL) ALL, NOPASSWD: \
+#         \/usr\/bin\/halt, \
+#         \/usr\/bin\/poweroff, \
+#         \/usr\/bin\/reboot, \
+#         \/usr\/bin\/shutdown, \
+#         \/usr\/bin\/zzz, \
+#         \/usr\/bin\/ZZZ, \
+#         \/usr\/bin\/mount, \
+#         \/usr\/bin\/umount/' /tmp/sudoers
+# cp /tmp/sudoers /etc/sudoers
 
 # echo '%wheel ALL=(ALL) ALL, NOPASSWD: \
 #         /usr/bin/halt, \
