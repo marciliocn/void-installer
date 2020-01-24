@@ -63,9 +63,10 @@ SWAPSIZE='1G'
 # Settings
 HOSTNAME='gladiator' # pick your favorite name
 HARDWARECLOCK='UTC' # Set RTC to UTC or localtime.???
-KEYMAP='us' # Include another options here
-TIMEZONE='America/Sao_Paulo'
-LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
+KEYMAP='us' # Define keyboard layout: us or br-abnt2 (include more options)
+TIMEZONE='America/Sao_Paulo' # Indicates which region on Earth the user is
+FONT='Lat2-Terminus16' # Indicates type face for terminal before X server starts
+# LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system git grub'
 
 # Option to select the device type/name
@@ -269,11 +270,20 @@ chroot /mnt chmod 755 /
 clear
 echo ''
 echo 'Customizations'
-# customization
 echo $HOSTNAME > /mnt/etc/hostname
-echo 'TIMEZONE="$TIMEZONE"' >> /mnt/etc/rc.conf
-echo 'KEYMAP="$KEYMAP"' >> /mnt/etc/rc.conf
-echo 'TTYS=2' >> /mnt/etc/rc.conf
+# echo 'TIMEZONE="'$TIMEZONE'"' >> /mnt/etc/rc.conf
+# echo 'KEYMAP="'$KEYMAP'"' >> /mnt/etc/rc.conf
+# HARDWARECLOCK=
+# FONT=
+# echo 'TTYS=2' >> /mnt/etc/rc.conf
+
+cat >> /mnt/etc/rc.conf <<EOF
+HARDWARECLOCK="${HARDWARECLOCK}"
+TIMEZONE="${TIMEZONE}"
+KEYMAP="${KEYMAP}"
+FONT="${FONT}"
+TTYS=2
+EOF
 
 
 ##################################################
@@ -302,18 +312,12 @@ echo 'Generating /etc/fstab'
 ###############################
 #### FSTAB ENTRIES - START ####
 ###############################
-#
-# echo "<file system> <dir> <type>  <options>   <dump>  <pass>" >> /mnt/etc/fstab
-# echo 'tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0' >> /mnt/etc/fstab
-# echo 'LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2' >> /mnt/etc/fstab
-# echo 'LABEL=voidlinux / xfs rw,relatime,discard 0 1' >> /mnt/etc/fstab
-# echo 'LABEL=swp0  swap  swap  defaults    0 0' >> /mnt/etc/fstab
-
+# For reference: <file system> <dir> <type> <options> <dump> <pass>
 cat > /mnt/etc/fstab <<EOF
-tmpfs   /tmp  tmpfs defaults,nosuid,nodev   0       0
+tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
 LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
 LABEL=voidlinux / xfs rw,relatime,discard 0 1
-LABEL=swp0  swap  swap  defaults    0 0
+LABEL=swp0  swap  swap  defaults  0 0
 EOF
 
 # For a removable drive I include the line:
@@ -384,10 +388,16 @@ chroot /mnt xbps-reconfigure -f $KERNEL_VER
 clear
 echo ''
 echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
+echo 'Remove TTYs from 3 to 6'
+echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
-ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
-ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+ln -s /etc/sv/dhcpcd /var/service/
+ln -s /etc/sv/sshd /var/service/
+rm /var/service/agetty-tty{3,4,5,6}
+touch /etc/sv/agetty-tty{3,4,5,6}/down
 EOCHROOT
+#ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
+#ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### DHCP & SSH END ###
