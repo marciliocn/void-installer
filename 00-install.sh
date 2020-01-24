@@ -386,18 +386,17 @@ chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
 ### DHCP & SSH START ###
 clear
-echo ''
-echo 'Active DHCP and SSH deamons for enable network connection and SSH server on next boot.'
-echo 'Remove TTYs from 3 to 6'
-echo ''
+echo '######## Services to Start on boot ########'
+echo '1. Activate DHCP deamon to enable network connection'
+echo '2. Activate SSH deamon to enable SSH server'
+echo '3. Remove all gettys except for tty1 and tty2'
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
-ln -s /etc/sv/dhcpcd /var/service/
-ln -s /etc/sv/sshd /var/service/
-rm /var/service/agetty-tty{3,4,5,6}
-touch /etc/sv/agetty-tty{3,4,5,6}/down
+ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
+ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+rm /etc/runit/runsvdir/default/agetty-tty[3456]
 EOCHROOT
-#ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
-#ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+
+#touch /etc/sv/agetty-tty{3,4,5,6}/down  -- verify on boots if this services are ON
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### DHCP & SSH END ###
