@@ -387,12 +387,22 @@ echo '######## Setup System Infos ########'
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Remove all gettys except for tty1 and tty2'
-echo '4. Create user and set password'
+echo '4. Create user, add sudo permissions and set password'
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 useradd -g users -G wheel,storage $USERNAME
+sed -e 's/^# %wheel ALL=(ALL) ALL/\
+        %wheel ALL=(ALL) ALL, NOPASSWD: \
+        /usr/bin/halt, \
+        /usr/bin/poweroff, \
+        /usr/bin/reboot, \
+        /usr/bin/shutdown, \
+        /usr/bin/zzz, \
+        /usr/bin/ZZZ, \
+        /usr/bin/mount, \
+        /usr/bin/umount/' /etc/sudoers
 passwd $USERNAME
 EOCHROOT
 
