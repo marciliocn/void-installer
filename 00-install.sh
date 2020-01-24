@@ -61,11 +61,13 @@ SWAPSIZE='1G'
 # LV[var]="2G" - Test if necessary for desktop
 # LV[home]="1G"
 # Settings
+USERNAME='voidlinux'
 HOSTNAME='gladiator' # pick your favorite name
-HARDWARECLOCK='UTC' # Set RTC to UTC or localtime.???
+HARDWARECLOCK='UTC' # Set RTC (Real Time Clock) to UTC or localtime
+TIMEZONE='America/Sao_Paulo' # Set which region on Earth the user is
 KEYMAP='us' # Define keyboard layout: us or br-abnt2 (include more options)
-TIMEZONE='America/Sao_Paulo' # Indicates which region on Earth the user is
-FONT='Lat2-Terminus16' # Indicates type face for terminal before X server starts
+FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
+TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system git grub'
 
@@ -271,11 +273,6 @@ clear
 echo ''
 echo 'Customizations'
 echo $HOSTNAME > /mnt/etc/hostname
-# echo 'TIMEZONE="'$TIMEZONE'"' >> /mnt/etc/rc.conf
-# echo 'KEYMAP="'$KEYMAP'"' >> /mnt/etc/rc.conf
-# HARDWARECLOCK=
-# FONT=
-# echo 'TTYS=2' >> /mnt/etc/rc.conf
 
 cat >> /mnt/etc/rc.conf <<EOF
 HARDWARECLOCK="${HARDWARECLOCK}"
@@ -384,22 +381,23 @@ echo 'Reconfigure initramfs'
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
-### DHCP & SSH START ###
+### SETUP SYSTEM INFOS START ###
 clear
-echo '######## Services to Start on boot ########'
+echo '######## Setup System Infos ########'
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Remove all gettys except for tty1 and tty2'
+echo '4. Create user and set password'
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
+useradd -g users -G wheel,storage $USERNAME
+passwd $USERNAME
 EOCHROOT
 
-#touch /etc/sv/agetty-tty{3,4,5,6}/down  -- verify on boots if this services are ON
-
 chroot /mnt /bin/sh /tmp/bootstrap.sh
-### DHCP & SSH END ###
+### SETUP SYSTEM INFOS END ###
 
 clear
 echo ''
