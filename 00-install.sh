@@ -244,7 +244,8 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # Install Void Linux
 clear
 echo ''
-echo 'Installing Void Linux files.'
+echo 'Installing Void Linux files'
+echo ''
 env XBPS_ARCH=x86_64-musl xbps-install -Sy -R ${REPO}/current/musl -r /mnt $PKG_LIST
 
 # Upon completion of the install, we set up our chroot jail, and chroot into our mounted filesystem:
@@ -260,6 +261,7 @@ cp -L /etc/resolv.conf /mnt/etc/
 clear
 echo ''
 echo 'Set Root Password'
+echo ''
 # create the password for the root user
 chroot /mnt passwd root
 
@@ -361,6 +363,7 @@ EOF
 clear
 echo ''
 echo 'Install GRUB'
+echo ''
 # Install GRUB to the disk
 chroot /mnt grub-install $DEVNAME
 
@@ -395,14 +398,14 @@ rm /etc/runit/runsvdir/default/agetty-tty[3456]
 useradd -g users -G wheel,storage $USERNAME
 sed -e 's/^# %wheel ALL=(ALL) ALL/\
         %wheel ALL=(ALL) ALL, NOPASSWD: \
-        /usr/bin/halt, \
-        /usr/bin/poweroff, \
-        /usr/bin/reboot, \
-        /usr/bin/shutdown, \
-        /usr/bin/zzz, \
-        /usr/bin/ZZZ, \
-        /usr/bin/mount, \
-        /usr/bin/umount/' /etc/sudoers
+        \/usr\/bin\/halt, \
+        \/usr\/bin\/poweroff, \
+        \/usr\/bin\/reboot, \
+        \/usr\/bin\/shutdown, \
+        \/usr\/bin\/zzz, \
+        \/usr\/bin\/ZZZ, \
+        \/usr\/bin\/mount, \
+        \/usr\/bin\/umount/' /etc/sudoers
 passwd $USERNAME
 EOCHROOT
 
