@@ -2,14 +2,18 @@
 
 # Name: Void Linux Installer
 # Authors: Marcílio Nascimento <marcilio.mcn at gmail.com>
-# Date: 2019, March
+# First Release: 2019, March
 # Description: Alternative install script that replaces the standard Void Linux installer.
 # License: MIT
 # Version: 
-# Changelog: 
+# Changelog:
+# 202001.02
+# - Remove TTYs from 3 to 6
+# - Added user and configs for sudo usage
+# - Adjust in /etc/rc.conf
 # 202001.01
 # - Added activation for DHCP and SSH server deamons
-# 201901.01
+# 201903.01
 # - MVP for installer, without cryptography
 
 # TODO:
@@ -41,15 +45,18 @@ echo ''
 # Declaring LV array (for LVM)
 # declare -A LV
 
-# Declare constants and variables
+##############################
+######## HEADER START ########
+##############################
+# DECLARE CONSTANTS AND VARIABLES
 UEFI=0 # 1=UEFI, 0=Legacy/BIOS platform along the script
 # REPO="http://alpha.us.repo.voidlinux.org"
 REPO='http://mirror.clarkson.edu/voidlinux'
-#DEVNAME="sda"
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
 # UPDATETYPE='-Sy' # If GenuineIntel update local repository and change the next one to only '-y'
 # SWAP=1 # 1=On, 0=Off
+
 # PARTITIONS SIZE
 EFISIZE='100M'
 SWAPSIZE='1G'
@@ -60,7 +67,8 @@ SWAPSIZE='1G'
 # LV[root]="2G"
 # LV[var]="2G" - Test if necessary for desktop
 # LV[home]="1G"
-# Settings
+
+# SETTINGS
 USERNAME='voidlinux'
 HOSTNAME='gladiator' # pick your favorite name
 HARDWARECLOCK='UTC' # Set RTC (Real Time Clock) to UTC or localtime
@@ -70,6 +78,9 @@ FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
 TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system git grub'
+############################
+######## HEADER END ########
+############################
 
 # Option to select the device type/name
 PS3='Select your device type/name: '
@@ -284,7 +295,6 @@ FONT="${FONT}"
 TTYS=2
 EOF
 
-
 ##################################################
 #### GLIBC ONLY - START - USE GLIBC IMAGE ISO ####
 ##################################################
@@ -375,7 +385,7 @@ chroot /mnt grub-install $DEVNAME
 clear
 echo ''
 echo 'Read the newest kernel'
-# Cat the Linux Kernel Version
+# Cat the last Linux Kernel Version
 KERNEL_VER=$(chroot /mnt xbps-query -s 'linux[0-9]*' | cut -f 2 -d ' ' | cut -f 1 -d -)
 
 clear
@@ -392,6 +402,7 @@ echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Remove all gettys except for tty1 and tty2'
 echo '4. Create user, set password and add sudo permissions'
 echo '5. Permanent swappiness optimization (great for Desktops)'
+echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
@@ -409,34 +420,6 @@ mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
 EOCHROOT
 
-# cp /etc/sudoers /tmp/sudoers
-# sed -e 's/^# %wheel ALL=(ALL) ALL/\
-#         %wheel ALL=(ALL) ALL, NOPASSWD: \
-#         \/usr\/bin\/halt, \
-#         \/usr\/bin\/poweroff, \
-#         \/usr\/bin\/reboot, \
-#         \/usr\/bin\/shutdown, \
-#         \/usr\/bin\/zzz, \
-#         \/usr\/bin\/ZZZ, \
-#         \/usr\/bin\/mount, \
-#         \/usr\/bin\/umount/' /tmp/sudoers
-# cp /tmp/sudoers /etc/sudoers
-
-# echo '%wheel ALL=(ALL) ALL, NOPASSWD: \
-#         /usr/bin/halt, \
-#         /usr/bin/poweroff, \
-#         /usr/bin/reboot, \
-#         /usr/bin/shutdown, \
-#         /usr/bin/zzz, \
-#         /usr/bin/ZZZ, \
-#         /usr/bin/mount, \
-#         /usr/bin/umount' | visudo
-
-# visudo <<EOF
-# :%s/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL, NOPASSWD: \/usr\/bin\/halt, \/usr\/bin\/poweroff, \/usr\/bin\/reboot, \/usr\/bin\/shutdown, \/usr\/bin\/zzz, \/usr\/bin\/ZZZ, \/usr\/bin\/mount, \/usr\/bin\/umount/g
-# :wq
-# EOF
-
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### SETUP SYSTEM INFOS END ###
 
@@ -445,7 +428,6 @@ echo ''
 echo 'Correct the grub install'
 chroot /mnt update-grub
 
-# exit
 ####################
 ### CHROOTed END ###
 ####################
