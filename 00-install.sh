@@ -403,10 +403,7 @@ echo 'Define password for user ${USERNAME}'
 echo ''
 passwd $USERNAME
 
-visudo <<EOF
-:%s/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL, NOPASSWD: \/usr\/bin\/halt, \/usr\/bin\/poweroff, \/usr\/bin\/reboot, \/usr\/bin\/shutdown, \/usr\/bin\/zzz, \/usr\/bin\/ZZZ, \/usr\/bin\/mount, \/usr\/bin\/umount/g
-:wq
-EOF
+echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
 mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
@@ -434,6 +431,11 @@ EOCHROOT
 #         /usr/bin/ZZZ, \
 #         /usr/bin/mount, \
 #         /usr/bin/umount' | visudo
+
+# visudo <<EOF
+# :%s/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL, NOPASSWD: \/usr\/bin\/halt, \/usr\/bin\/poweroff, \/usr\/bin\/reboot, \/usr\/bin\/shutdown, \/usr\/bin\/zzz, \/usr\/bin\/ZZZ, \/usr\/bin\/mount, \/usr\/bin\/umount/g
+# :wq
+# EOF
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### SETUP SYSTEM INFOS END ###
