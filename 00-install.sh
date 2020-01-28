@@ -402,6 +402,7 @@ echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Remove all gettys except for tty1 and tty2'
 echo '4. Create user, set password and add sudo permissions'
 echo '5. Permanent swappiness optimization (great for Desktops)'
+echo '6. Update mirror and sync main repo (best for Brazil)'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
@@ -418,6 +419,11 @@ echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin
 
 mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
+
+echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
+xbps-install -Su
+
+xbps-install -y xorg-minimal xf86-video-intel xset alsa-utils bspwm sxhkd st
 EOCHROOT
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
