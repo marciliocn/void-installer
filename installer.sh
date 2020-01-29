@@ -441,23 +441,6 @@ chroot /mnt update-grub
 
 # Bugfix for EFI installations (after finished, poweroff e poweron, the system do not start)
 [ $UEFI ] && install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
-#if [ $UEFI ]; then
-#  install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
-#fi
-
-# Now add customization to installation - return this after succefully installation
-#echo "[!] Running custom scripts"
-#if [ -d ./custom ]; then
-#  cp -r ./custom /mnt/tmp
-
-#  # If we detect any .sh let's run them in the chroot
-#  for SHFILE in /mnt/tmp/custom/*.sh; do
-#    chroot /mnt sh /tmp/custom/$(basename $SHFILE)
-#  done
-
-#  # Then cleanup chroot
-#  rm -rf /mnt/tmp/custom
-#fi
 
 umount -R /mnt
 

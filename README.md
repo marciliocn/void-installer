@@ -6,7 +6,7 @@ Installer script as a alternative for default `void-installer`.
 - Automated process installation for Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
 - ~~Doesn't set up a common user~~
-- Options for custom install in `install-musl.sh` header
+- Options for custom install in `installer.sh` header
 - Formating `/` with `xfs filesystem`
 - With `GIT` and `GRUB`
 - Enable automatically DHCP, Firewall and SSH server daemons (and internet working on next reboot)
@@ -16,8 +16,8 @@ Installer script as a alternative for default `void-installer`.
 - Open terminal and install `git`: `sudo xbps-install -Sy git`<sup>1</sup>
 - `sudo git clone http://github.com/marciliocn/void-installer`
 - `cd void-installer`
-- Edit the header of `install-musl.sh` to your taste
-- `sudo ./install-musl.sh`
+- Edit the header of `installer.sh` to your taste
+- `sudo ./installer.sh`
 - Eject the installation media from drive and boot the machine
 - ~~To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`~~
 - Enjoy ;)
