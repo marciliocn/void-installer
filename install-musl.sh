@@ -5,16 +5,7 @@
 # First Release: 2019, March
 # Description: Alternative install script that replaces the standard Void Linux installer.
 # License: MIT
-# Version: 
-# Changelog:
-# 202001.02
-# - Remove TTYs from 3 to 6
-# - Added user and configs for sudo usage
-# - Adjust in /etc/rc.conf
-# 202001.01
-# - Added activation for DHCP and SSH server deamons
-# 201903.01
-# - MVP for installer, without cryptography
+# Version: 202001.03
 
 # TODO:
 # - Finish installation musl full crypto with lvm (LUKS + LVM) (encryption for both `boot` and `root` partitions)
@@ -24,7 +15,7 @@
 # - Finish installation glibc crypto with lvm
 # - Validate with glibc and musl installation
 # - Add flag to crypt or normal installation
-# - Include brazilian portuguese language option (and both with International English)
+# - Include brazilian portuguese language option (and `us` too with International English)
 # - Add TXT files with Keymaps, Timezone, Lang, etc....in root directory as reference
 # - Option to scape partitioning and formating device
 # - Verifiy if SWAP is cryptographied (see https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption)
@@ -69,8 +60,8 @@ SWAPSIZE='1G'
 # LV[home]="1G"
 
 # SETTINGS
-USERNAME='voidlinux'
-HOSTNAME='gladiator' # pick your favorite name
+USERNAME='voidlinux' # Set your username
+HOSTNAME='gladiator' # Pick your favorite name
 HARDWARECLOCK='UTC' # Set RTC (Real Time Clock) to UTC or localtime
 TIMEZONE='America/Sao_Paulo' # Set which region on Earth the user is
 KEYMAP='us' # Define keyboard layout: us or br-abnt2 (include more options)
@@ -395,21 +386,26 @@ echo 'Reconfigure initramfs'
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
 ### SETUP SYSTEM INFOS START ###
+# swappiness do not working - research
+# echo '5. Permanent swappiness optimization (great for Desktops)'
+# mkdir /etc/sysctl.d/
+# echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
+
 clear
 echo '######## Setup System Infos ########'
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Remove all gettys except for tty1 and tty2'
 echo '4. Create user, set password and add sudo permissions'
-echo '5. Permanent swappiness optimization (great for Desktops)'
 echo '6. Update mirror and sync main repo (best for Brazil)'
+echo '7. Enable Uncomplicated Firewall (ufw)'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
-useradd -g users -G wheel,storage $USERNAME
+useradd -g users -G wheel,storage,audio $USERNAME
 echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
@@ -417,13 +413,14 @@ passwd $USERNAME
 
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
-mkdir /etc/sysctl.d/
-echo 'vm.swappiness=10' | tee /etc/sysctl.d/99-swappiness.conf
-
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
 xbps-install -Su
 
-xbps-install -y xorg-minimal xf86-video-intel xset alsa-utils bspwm sxhkd st
+xbps-install -y xorg-minimal xf86-video-intel xset alsa-utils bspwm sxhkd st ufw
+
+xbps-reconfigure ufw
+ufw enable
+ln -s /etc/sv/ufw /etc/runit/runsvdir/default/
 EOCHROOT
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh

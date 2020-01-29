@@ -6,7 +6,7 @@ Installer script as a alternative for default `void-installer`.
 - Automated process installation for Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
 - ~~Doesn't set up a common user~~
-- Options for custom install in header of `00-install.sh`
+- Options for custom install in header of `install-musl.sh`
 - Formating `/` with `xfs filesystem`
 - With GRUB
 - Enable automatically DHCP and SSH server deamons (and internet work on next reboot)
@@ -16,8 +16,8 @@ Installer script as a alternative for default `void-installer`.
 - Open terminal and install `git`: `sudo xbps-install -Sy git`<sup>1</sup>
 - `sudo git clone http://github.com/marciliocn/void-installer`
 - `cd void-installer`
-- Edit the header of `00-install.sh` to your taste
-- `sudo ./00-install.sh`
+- Edit the header of `install-musl.sh` to your taste
+- `sudo ./install-musl.sh`
 - Eject the installation media from drive and boot the machine
 - ~~To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`~~
 - Enjoy ;)
@@ -33,13 +33,16 @@ Installer script as a alternative for default `void-installer`.
 
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
-- Add a pos-install script for automate tuning and another configs
+- ~~Add a pos-install script for automate tuning and another configs~~
 - Add a option to choose filesystem for partitions (don't forget to change in fstab too)
 - Automatic answer for import keys (on first time repository sync)
 - Include `rEFInd`
 - Option to install without `GRUB` (on Arch it is possible)
 
 ### CHANGELOG
+#### 202001.03
+- Added audio group in user creation script
+- Include Uncomplicated Firewall (ufw)
 #### 202001.02
 - Remove TTYs from 3 to 6
 - Added user and configs for sudo usage
