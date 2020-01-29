@@ -6,10 +6,10 @@ Installer script as a alternative for default `void-installer`.
 - Automated process installation for Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
 - ~~Doesn't set up a common user~~
-- Options for custom install in header of `install-musl.sh`
+- Options for custom install in `install-musl.sh` header
 - Formating `/` with `xfs filesystem`
-- With GRUB
-- Enable automatically DHCP and SSH server deamons (and internet work on next reboot)
+- With `GIT` and `GRUB`
+- Enable automatically DHCP, Firewall and SSH server daemons (and internet working on next reboot)
 
 ### USAGE
 - Boot from Void Linux Live Image with a DE (Desktop Environment)
@@ -42,6 +42,7 @@ Installer script as a alternative for default `void-installer`.
 ### CHANGELOG
 #### 202001.03
 - Added audio group in user creation script
+- Added update mirror for new installation (the same choosen to install)
 - Include Uncomplicated Firewall (ufw)
 #### 202001.02
 - Remove TTYs from 3 to 6

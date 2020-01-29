@@ -382,6 +382,7 @@ KERNEL_VER=$(chroot /mnt xbps-query -s 'linux[0-9]*' | cut -f 2 -d ' ' | cut -f 
 clear
 echo ''
 echo 'Reconfigure initramfs'
+echo ''
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
@@ -416,7 +417,7 @@ echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
 xbps-install -Su
 
-xbps-install -y xorg-minimal xf86-video-intel xset alsa-utils bspwm sxhkd st ufw
+xbps-install -y xorg-minimal xset alsa-utils bspwm sxhkd st ufw
 
 xbps-reconfigure ufw
 ufw enable
