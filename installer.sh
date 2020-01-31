@@ -164,8 +164,8 @@ EOF
 # FORMATING
 mkfs.vfat -F 32 -n EFI ${DEVNAME}1
 mkswap -L swp0 ${DEVNAME}2
-mkfs.$FSYS -f -L voidlinux ${DEVNAME}3
-mkfs.$FSYS -f -L home ${DEVNAME}4
+mkfs.$FSYS -L voidlinux ${DEVNAME}3
+mkfs.$FSYS -L home ${DEVNAME}4
 
 # MOUNTING
 mount ${DEVNAME}3 /mnt
