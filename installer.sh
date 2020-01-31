@@ -52,7 +52,7 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 EFISIZE='100M'
 SWAPSIZE='1G'
 # BOOTSIZE='512M' # 512MB for /boot should be sufficient to host 7 to 8 kernel versions
-# ROOTSIZE='5G'
+ROOTSIZE='4G'
 
 # LVM Size ARRAY (testing)
 # LV[root]="2G"
@@ -97,6 +97,30 @@ do
   esac
 done
 
+# Option to select the file system type to format paritions
+PS4='Select the file system type to format partitions: '
+filesystems=('ext3' 'ext4' 'xfs')
+select filesysformat in "${filesystems[@]}"
+do
+  case $filesysformat in
+    'ext3')
+      FSYS='ext3'
+      break
+      ;;
+    'ext4')
+      FSYS='ext3'
+      break
+      ;;
+    'xfs')
+      FSYS='xfs'
+      break
+      ;;
+    *)
+      echo 'This option is invalid.'
+      ;;
+  esac
+done
+
 # Wipe /dev/${DEVNAME} (return this and test when the installation process is working)
 #dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
 
@@ -126,11 +150,13 @@ done
 # Convert size of partitions to KB
 EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
 SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
+ROOTSIZE=$(numfmt --to-unit=1024 --from=iec ${ROOTSIZE})
 
 sfdisk $DEVNAME <<EOF
   label: gpt
   ,${EFISIZE}K,U,*
   ,${SWAPSIZE}K,S
+  ,${ROOTSIZE}K,S
   ,,L
 EOF
 ###### PARTITIONS - END ######
@@ -138,11 +164,13 @@ EOF
 # FORMATING
 mkfs.vfat -F 32 -n EFI ${DEVNAME}1
 mkswap -L swp0 ${DEVNAME}2
-mkfs.xfs -f -L voidlinux ${DEVNAME}3
+mkfs.$FSYS -f -L voidlinux ${DEVNAME}3
+mkfs.$FSYS -f -L home ${DEVNAME}4
 
 # MOUNTING
 mount ${DEVNAME}3 /mnt
 mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
+mkdir /mnt/home && mount ${DEVNAME}4 /mnt/home
 
 # When UEFI
 mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
@@ -255,7 +283,11 @@ mount -t proc proc /mnt/proc
 mount -t sysfs sys /mnt/sys
 mount -o bind /dev /mnt/dev
 mount -t devpts pts /mnt/dev/pts
+
+# Copy DNS file
 cp -L /etc/resolv.conf /mnt/etc/
+# For notebooks: added DNSs below in /etc/resolv.conf (because the notbook do not always is on the same router) 
+printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' > /mnt/etc/resolv.conf
 
 ######################
 ### CHROOTed START ###
@@ -316,7 +348,8 @@ echo 'Generating /etc/fstab'
 cat > /mnt/etc/fstab <<EOF
 tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
 LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
-LABEL=voidlinux / xfs rw,relatime,discard 0 1
+LABEL=voidlinux / $FSYS rw,relatime,discard 0 1
+LABEL=home /home $FSYS rw,relatime,discard 0 1
 LABEL=swp0  swap  swap  defaults  0 0
 EOF
 
@@ -387,23 +420,21 @@ echo ''
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
 ### SETUP SYSTEM INFOS START ###
-# swappiness do not working - research
-# echo '5. Permanent swappiness optimization (great for Desktops)'
-# mkdir /etc/sysctl.d/
-# echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
-
 clear
 echo '######## Setup System Infos ########'
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
-echo '3. Remove all gettys except for tty1 and tty2'
-echo '4. Create user, set password and add sudo permissions'
+echo '3. Activate Uncomplicated Firewall (ufw) to enable firewall'
+echo '4. Remove all gettys except for tty1 and tty2'
+echo '5. Create user, set password and add sudo permissions'
 echo '6. Update mirror and sync main repo (best for Brazil)'
-echo '7. Enable Uncomplicated Firewall (ufw)'
+echo '7. Reconfigure Uncomplicated Firewall (ufw)'
+echo '8. Permanent swappiness optimization (great for Linux Desktops)'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+ln -s /etc/sv/ufw /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
 useradd -g users -G wheel,storage,audio $USERNAME
@@ -417,31 +448,34 @@ echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
 xbps-install -Su
 
-xbps-install -y xorg-minimal xset alsa-utils bspwm sxhkd st ufw
-
 xbps-reconfigure ufw
-ufw enable
-ln -s /etc/sv/ufw /etc/runit/runsvdir/default/
+
+mkdir /etc/sysctl.d/
+echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
+
+update-grub
 EOCHROOT
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### SETUP SYSTEM INFOS END ###
 
-clear
-echo ''
-echo 'Correct the grub install'
-chroot /mnt update-grub
+# clear
+# echo ''
+# echo 'Correct the grub install'
+# chroot /mnt update-grub
 
 ####################
 ### CHROOTed END ###
 ####################
 
+# VVV confirm if necessary for glibc
 # grub-mkconfig > /boot/grub/grub.cfg
 # grub-install $DEV
 
 # Bugfix for EFI installations (after finished, poweroff e poweron, the system do not start)
 [ $UEFI ] && install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
 
+# Umount folder used for instllation
 umount -R /mnt
 
 clear

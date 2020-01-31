@@ -8,8 +8,8 @@ Installer script as a alternative for default `void-installer`.
 - ~~Doesn't set up a common user~~
 - Options for custom install in `installer.sh` header
 - Formating `/` with `xfs filesystem`
-- With `GIT` and `GRUB`
-- Enable automatically DHCP, Firewall and SSH server daemons (and internet working on next reboot)
+- With `GIT`, `UFW` and `GRUB`
+- Enable automatically DHCP and SSH server daemons (and internet working on next reboot)
 
 ### USAGE
 - Boot from Void Linux Live Image with a DE (Desktop Environment)
@@ -30,6 +30,7 @@ Installer script as a alternative for default `void-installer`.
 - <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE
 - The version `void-live-x86_64-musl-20191109[-lxqt].iso` getting error with this installation
 - The installation process running about 15 min
+- To enable firewall, `sudo ufw enable` when log in in new user
 
 ### TODO
 - Create process installation for Void Linux BIOS/MBR MUSL
