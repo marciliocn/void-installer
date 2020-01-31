@@ -108,7 +108,7 @@ do
       break
       ;;
     'ext4')
-      FSYS='ext3'
+      FSYS='ext4'
       break
       ;;
     'xfs')
@@ -156,7 +156,7 @@ sfdisk $DEVNAME <<EOF
   label: gpt
   ,${EFISIZE}K,U,*
   ,${SWAPSIZE}K,S
-  ,${ROOTSIZE}K,S
+  ,${ROOTSIZE}K,L
   ,,L
 EOF
 ###### PARTITIONS - END ######
