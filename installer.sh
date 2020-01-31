@@ -3,26 +3,9 @@
 # Name: Void Linux Installer
 # Authors: Marcílio Nascimento <marcilio.mcn at gmail.com>
 # First Release: 2019, March
-# Description: Alternative install script that replaces the standard Void Linux installer.
+# Description: Alternative LEAN install script that replaces the standard Void Linux installer.
 # License: MIT
-# Version: 202001.03
-
-# TODO:
-# - Finish installation musl full crypto with lvm (LUKS + LVM) (encryption for both `boot` and `root` partitions)
-# - Include /home partition in MBR installation
-# - Comparing partitions size from MB and KB (choose the best representative - in KB, necessary conversion)
-# - Teste changing to sh indeed bash (on shebang)
-# - Finish installation glibc crypto with lvm
-# - Validate with glibc and musl installation
-# - Add flag to crypt or normal installation
-# - Include brazilian portuguese language option (and `us` too with International English)
-# - Add TXT files with Keymaps, Timezone, Lang, etc....in root directory as reference
-# - Option to scape partitioning and formating device
-# - Verifiy if SWAP is cryptographied (see https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption)
-# - Add /home as a cryptographied partition (only /boot and / are cryptografied). See void-install-uefi on Joplin
-# - Insert a for loop to open and crypto partitions (starting in "echo "[!] Encrypt boot partition"" line - like in "for FS in ${!LV[@]}; do" line)
-# - Option o install with local repository
-# - Update the DEVNAME process to choose with `lsblk | grep -a '^[^l][a-z]' | cut -d ' ' -f 1` (removing hard coded)
+# Version: 202001.04
 
 # Exit immediately if a command exits with a non-zero exit status
 set -e
@@ -96,6 +79,7 @@ do
       ;;
   esac
 done
+clear
 
 # Option to select the file system type to format paritions
 PS4='Select the file system type to format partitions: '
@@ -120,7 +104,7 @@ do
       ;;
   esac
 done
-
+clear
 # Wipe /dev/${DEVNAME} (return this and test when the installation process is working)
 #dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
 
@@ -284,10 +268,10 @@ mount -t sysfs sys /mnt/sys
 mount -o bind /dev /mnt/dev
 mount -t devpts pts /mnt/dev/pts
 
-# Copy DNS file
-cp -L /etc/resolv.conf /mnt/etc/
+# Copy DNS file - DO NOT WORKING
+# cp -L /etc/resolv.conf /mnt/etc/
 # For notebooks: added DNSs below in /etc/resolv.conf (because the notbook do not always is on the same router) 
-printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' > /mnt/etc/resolv.conf
+# printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' > /mnt/etc/resolv.conf
 
 ######################
 ### CHROOTed START ###
@@ -430,6 +414,7 @@ echo '5. Create user, set password and add sudo permissions'
 echo '6. Update mirror and sync main repo (best for Brazil)'
 echo '7. Reconfigure Uncomplicated Firewall (ufw)'
 echo '8. Permanent swappiness optimization (great for Linux Desktops)'
+echo '9. Correct the grub install'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
@@ -458,15 +443,6 @@ EOCHROOT
 
 chroot /mnt /bin/sh /tmp/bootstrap.sh
 ### SETUP SYSTEM INFOS END ###
-
-# clear
-# echo ''
-# echo 'Correct the grub install'
-# chroot /mnt update-grub
-
-####################
-### CHROOTed END ###
-####################
 
 # VVV confirm if necessary for glibc
 # grub-mkconfig > /boot/grub/grub.cfg
