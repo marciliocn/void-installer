@@ -31,7 +31,7 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 # UPDATETYPE='-Sy' # If GenuineIntel update local repository and change the next one to only '-y'
 # SWAP=1 # 1=On, 0=Off
 
-# PARTITIONS SIZE
+# PARTITIONS SIZE (M for Megabytes, G for Gigabytes)
 EFISIZE='100M'
 SWAPSIZE='1G'
 # BOOTSIZE='512M' # 512MB for /boot should be sufficient to host 7 to 8 kernel versions
@@ -132,15 +132,15 @@ clear
 # fi
 
 # Convert size of partitions to KB
-EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
-SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
-ROOTSIZE=$(numfmt --to-unit=1024 --from=iec ${ROOTSIZE})
+# EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
+# SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
+# ROOTSIZE=$(numfmt --to-unit=1024 --from=iec ${ROOTSIZE})
 
 sfdisk $DEVNAME <<EOF
   label: gpt
-  ,${EFISIZE}K,U,*
-  ,${SWAPSIZE}K,S
-  ,${ROOTSIZE}K,L
+  ,${EFISIZE},U,*
+  ,${SWAPSIZE},S
+  ,${ROOTSIZE},L
   ,,L
 EOF
 ###### PARTITIONS - END ######
