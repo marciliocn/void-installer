@@ -82,7 +82,7 @@ done
 clear
 
 # Option to select the file system type to format paritions
-PS4='Select the file system type to format partitions: '
+PS3='Select the file system type to format partitions: '
 filesystems=('ext3' 'ext4' 'xfs')
 select filesysformat in "${filesystems[@]}"
 do
@@ -329,12 +329,20 @@ echo 'Generating /etc/fstab'
 #### FSTAB ENTRIES - START ####
 ###############################
 # For reference: <file system> <dir> <type> <options> <dump> <pass>
+# cat > /mnt/etc/fstab <<EOF
+# tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
+# LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+# LABEL=voidlinux / $FSYS rw,relatime,discard 0 1
+# LABEL=home /home $FSYS rw,relatime,discard 0 2
+# LABEL=swp0  swap  swap  defaults  0 0
+# EOF
+
 cat > /mnt/etc/fstab <<EOF
 tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-LABEL=EFI /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
-LABEL=voidlinux / $FSYS rw,relatime,discard 0 1
-LABEL=home /home $FSYS rw,relatime,discard 0 1
-LABEL=swp0  swap  swap  defaults  0 0
+$(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+$(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  defaults  0 0
+$(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,relatime,discard 0 1
+$(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,relatime,discard 0 2
 EOF
 
 # For a removable drive I include the line:
