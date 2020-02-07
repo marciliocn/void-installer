@@ -131,11 +131,6 @@ clear
 #   EOF
 # fi
 
-# Convert size of partitions to KB
-# EFISIZE=$(numfmt --to-unit=1024 --from=iec ${EFISIZE})
-# SWAPSIZE=$(numfmt --to-unit=1024 --from=iec ${SWAPSIZE})
-# ROOTSIZE=$(numfmt --to-unit=1024 --from=iec ${ROOTSIZE})
-
 sfdisk $DEVNAME <<EOF
   label: gpt
   ,${EFISIZE},U,*
