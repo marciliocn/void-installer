@@ -52,9 +52,13 @@ FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
 TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system ufw git grub' # Install this packages (add more to your taste)
+# Tip: In this step, python3 is a dependency from ufw...no need to install this otherwise
 ############################
 ######## HEADER END ########
 ############################
+
+# Set installation font (more legible)
+setfont $FONT
 
 # Option to select the device type/name
 PS3='Select your device type/name: '

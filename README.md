@@ -18,8 +18,8 @@ LEAN Installer script as a alternative for default `void-installer`.
 - Boot from Void Linux Live Image <sup id="a1">[1](#f1)</sup> and log in as `root` (password `voidlinux`)
 - Install `curl` with `xbps-install -Sy curl`
 - Start installation:
-	a. Without customizations: `bash -c "$(curl -L git.io/void-musl.sh)"`
-	b. With customizations: `curl -LO git.io/void-musl.sh`
+	- a. Without customizations: `bash -c "$(curl -L git.io/void-musl.sh)"`
+	- b. With customizations: `curl -LO git.io/void-musl.sh`
 		- Edit the header of `void-musl.sh` file to your taste (using `vi` for example)
 		- Make it executable with `chmod +x void-musl.sh`
 		- `./void-musl.sh`
@@ -30,12 +30,12 @@ LEAN Installer script as a alternative for default `void-installer`.
 
 ### INFOS
 - Tested:
-	- In VirtualBox Machine on Intel Core i3-2367M 1.4GHz with 2 cores and RAM with 1024MB
+	- In VirtualBox on Intel Core i3-2367M 1.4GHz with 2 cores and RAM with 1024MB
 	- With UEFI MUSL
 	- In Arch x86_64
 	- <sup id="f1">1</sup> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
 		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.`
-- The installation process running about 15 min
+- The installation process running about 12 min in VirtualBox with SATA storage
 - To enable firewall, `sudo ufw enable` when log in new user
 
 ### TODO
