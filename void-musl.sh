@@ -280,7 +280,11 @@ echo ''
 echo 'Set Root Password'
 echo ''
 # create the password for the root user
-chroot /mnt passwd root
+while true; do
+  chroot /mnt passwd root && break
+  echo "Password did not match. Please try again"
+  sleep 3s
+done
 
 clear
 echo ''
@@ -434,10 +438,11 @@ useradd -g users -G wheel,storage,audio $USERNAME
 echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
+
 while true; do
-  passwd $USERNAME
-  echo "Please try again"
-  sleep 5s
+  passwd $USERNAME && break
+  echo "Password did not match. Please try again"
+  sleep 3s
 done
 
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
