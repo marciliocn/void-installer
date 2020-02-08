@@ -10,6 +10,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - Enable automatically DHCP and SSH server daemons (and internet work on next reboot)
 - `/home` partition separated from `/`
 - With file system options (`ext3`, `ext4` and `xfs`) to format `/` and `/home` partitions
+- `sudo poweroff` and `sudo restart` without password
 - Swappiness option enabled (but not working - I guess that is a BUG)
 - Best for Desktop or Notebooks
 
@@ -29,13 +30,13 @@ LEAN Installer script as a alternative for default `void-installer`.
 
 ### INFOS
 - Tested:
-	- In VirtualBox Machine
+	- In VirtualBox Machine on Intel Core i3-2367M 1.4GHz with 2 cores and RAM with 1024MB
 	- With UEFI MUSL
 	- In Arch x86_64
 - The installation process running about 15 min
 - To enable firewall, `sudo ufw enable` when log in new user
 
-<b id="f1">1</b> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
+<sup id="f1">1</sup> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
 	> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.`
 
 ### TODO

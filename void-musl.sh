@@ -51,7 +51,7 @@ KEYMAP='us' # Define keyboard layout: us or br-abnt2 (include more options)
 FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
 TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
-PKG_LIST='base-system git grub'
+PKG_LIST='base-system ufw git grub' # Install this packages (add more to your taste)
 ############################
 ######## HEADER END ########
 ############################
