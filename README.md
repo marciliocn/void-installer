@@ -6,7 +6,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - Automated process for LEAN installation of Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
 - Options for custom install in `void-musl.sh` header
-- With `GIT`, `UFW` and `GRUB`
+- With `GIT` and `GRUB`
 - Enable automatically DHCP and SSH server daemons (and internet work on next reboot)
 - `/home` partition separated from `/`
 - With file system options (`ext3`, `ext4` and `xfs`) to format `/` and `/home` partitions
@@ -36,7 +36,6 @@ LEAN Installer script as a alternative for default `void-installer`.
 	- <sup id="f1">1</sup> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
 		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.`
 - The installation process running about 12 min in VirtualBox with SATA storage
-- To enable firewall, `sudo ufw enable` when log in new user
 
 ### TODO
 - [ ] Create process installation for Void Linux BIOS/MBR MUSL
@@ -47,7 +46,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - [ ] Include `rEFInd`
 - [ ] Option to install without `GRUB` (on Arch it is possible)
 - [ ] Finish installation musl full crypto with lvm (LUKS + LVM) (encryption for both `boot` and `root` partitions)
-- [ ] Comparing partitions size from MB and KB (choose the best representative - in KB, necessary conversion)
+- [x] Comparing partitions size from MB and KB (choose the best representative - in KB, necessary conversion)
 - [ ] Test changing to sh indeed bash (on shebang)
 - [ ] Finish installation glibc crypto with lvm
 - [ ] Validate with glibc and musl installation
@@ -62,6 +61,9 @@ LEAN Installer script as a alternative for default `void-installer`.
 - [ ] Add TXT files with Keymaps, Timezone, Lang, etc....in root directory as reference
 
 ### CHANGELOG
+#### 202002.02
+- Double check on input password for `root` and `user` defined in header
+- Removed Uncomplicated Firewall (ufw)
 #### 202002.01
 - Change PS4 to PS3 to choose filesystem
 - FSTAB check order on partitions

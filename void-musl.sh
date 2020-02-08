@@ -5,7 +5,7 @@
 # First Release: 2019, March
 # Description: Alternative LEAN install script that replaces the standard Void Linux installer.
 # License: MIT
-# Version: 202002.01
+# Version: 202002.02
 
 # Exit immediately if a command exits with a non-zero exit status
 set -e
@@ -61,6 +61,10 @@ PKG_LIST='base-system git grub' # Install this packages (add more to your taste)
 setfont $FONT
 
 # Option to select the device type/name
+echo ''
+echo 'DEVICE SELECTION'
+echo ''
+echo ''
 PS3='Select your device type/name: '
 options=('sda' 'sdb' 'nvme')
 select opt in "${options[@]}"
@@ -86,6 +90,10 @@ done
 clear
 
 # Option to select the file system type to format paritions
+echo ''
+echo 'FILE SYSTEM TYPE SELECTION'
+echo ''
+echo ''
 PS3='Select the file system type to format partitions: '
 filesystems=('ext3' 'ext4' 'xfs')
 select filesysformat in "${filesystems[@]}"
@@ -282,8 +290,9 @@ echo ''
 # create the password for the root user
 while true; do
   chroot /mnt passwd root && break
-  echo "Password did not match. Please try again"
+  echo 'Password did not match. Please try again'
   sleep 3s
+  echo ''
 done
 
 clear
@@ -420,18 +429,15 @@ echo '######## Setup System Infos ########'
 echo ''
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
-echo '3. Activate Uncomplicated Firewall (ufw) to enable firewall'
-echo '4. Remove all gettys except for tty1 and tty2'
-echo '5. Create user, set password and add sudo permissions'
-echo '6. Update mirror and sync main repo (best for Brazil)'
-echo '7. Reconfigure Uncomplicated Firewall (ufw)'
-echo '8. Permanent swappiness optimization (great for Linux Desktops)'
-echo '9. Correct the grub install'
+echo '3. Remove all gettys except for tty1 and tty2'
+echo '4. Create user, set password and add sudo permissions'
+echo '5. Update mirror and sync main repo (best for Brazil)'
+echo '6. Permanent swappiness optimization (great for Linux Desktops)'
+echo '7. Correct the grub install'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
-ln -s /etc/sv/ufw /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
 useradd -g users -G wheel,storage,audio $USERNAME
@@ -441,16 +447,15 @@ echo ''
 
 while true; do
   passwd $USERNAME && break
-  echo "Password did not match. Please try again"
+  echo 'Password did not match. Please try again'
   sleep 3s
+  echo ''
 done
 
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
 xbps-install -Su
-
-xbps-reconfigure ufw
 
 mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
