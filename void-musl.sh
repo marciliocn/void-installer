@@ -51,7 +51,7 @@ KEYMAP='us' # Define keyboard layout: us or br-abnt2 (include more options)
 FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
 TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
-PKG_LIST='base-system ufw git grub' # Install this packages (add more to your taste)
+PKG_LIST='base-system git grub' # Install this packages (add more to your taste)
 # Tip: In this step, python3 is a dependency from ufw...no need to install this otherwise
 ############################
 ######## HEADER END ########
@@ -413,6 +413,7 @@ chroot /mnt xbps-reconfigure -f $KERNEL_VER
 ### SETUP SYSTEM INFOS START ###
 clear
 echo '######## Setup System Infos ########'
+echo ''
 echo '1. Activate DHCP deamon to enable network connection'
 echo '2. Activate SSH deamon to enable SSH server'
 echo '3. Activate Uncomplicated Firewall (ufw) to enable firewall'
@@ -433,7 +434,11 @@ useradd -g users -G wheel,storage,audio $USERNAME
 echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
-passwd $USERNAME
+while true; do
+  passwd $USERNAME
+  echo "Please try again"
+  sleep 5s
+done
 
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
