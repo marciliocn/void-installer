@@ -5,33 +5,36 @@ LEAN Installer script as a alternative for default `void-installer`.
 ### FEATURES
 - Automated process for LEAN installation of Void Linux UEFI MUSL
 - Doesn't install any Desktop Environment
-- Options for custom install in `installer.sh` header
-- Formating `/` with `xfs filesystem`
+- Options for custom install in `void-musl.sh` header
 - With `GIT`, `UFW` and `GRUB`
-- Enable automatically DHCP and SSH server daemons (and internet working on next reboot)
-- `/home` stay in a separated partition
-- With options (`ext3`, `ext4` and `xfs`) to select file system to format `/` and '/home' partitions
+- Enable automatically DHCP and SSH server daemons (and internet work on next reboot)
+- `/home` partition separated from `/`
+- With file system options (`ext3`, `ext4` and `xfs`) to format `/` and '/home' partitions
 - Swappiness option enabled (but not working - I guess that is a BUG)
 - ~~Doesn't set up a common user~~
+- Best for Desktop or Notebooks
 
 ### USAGE
-- Boot from Void Linux Live Image with a DE (Desktop Environment)
-- Open terminal and install `git`: `sudo xbps-install -Sy git`<sup>1</sup>
-- `sudo git clone http://github.com/marciliocn/void-installer`
-- `cd void-installer`
-- Edit the header of `installer.sh` to your taste
-- `sudo ./installer.sh`
-- Eject the installation media from drive and boot the machine
-- ~~To enable internet after restart, run: `ln -s /etc/sv/dhcpcd /var/service/`~~
+- Boot from Void Linux Live Image<sup>1</sup> and log in as `root` (password `voidlinux`)
+- Install `curl`: `xbps-install -Sy curl`
+- Start installation:
+	a. Without customizations: `bash -c "$(curl -L git.io/void-musl.sh)"`
+	b. With customizations: `curl -LO git.io/void-musl.sh`
+		- Edit the header of `void-musl.sh` file to your taste (using `vi` for example)
+		- Make it executable with `chmod +x void-musl.sh`
+		- `./void-musl.sh`
+- After installation end, eject the installation media from drive and reboot the machine
 - Enjoy ;)
 
+> *Add `sudo` in front of all commands if you choose a Live Image WITH Desktop Environment*
+
 ### INFOS
-- Tested only:
+- Tested:
 	- In VirtualBox Machine
 	- With UEFI MUSL
-	- Arch x86_64
-- <sup>1</sup> Using `void-live-x86_64-musl-20181111.iso` (without DE) in this step show "Transaction aborted due to insufficient disk space (need XXXMB, got XXMB free)". That's why use a Live Image with DE
-- The version `void-live-x86_64-musl-20191109[-lxqt].iso` getting error with this installation
+	- In Arch x86_64
+	- <sup>1</sup> With `void-live-x86_64-musl-20190526.iso` live image
+		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.`
 - The installation process running about 15 min
 - To enable firewall, `sudo ufw enable` when log in new user
 
@@ -54,11 +57,15 @@ LEAN Installer script as a alternative for default `void-installer`.
 - [ ] Verifiy if SWAP is cryptographied (see https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption)
 - [ ] Add /home as a cryptographied partition (only /boot and / are cryptografied). See void-install-uefi on Joplin
 - [ ] Insert a for loop to open and crypto partitions (starting in "echo "[!] Encrypt boot partition"" line - like in "for FS in ${!LV[@]}; do" line)
-- [ ] Option o install with local repository
+- [ ] Option to install with local repository
 - [ ] Update the DEVNAME process to choose with `lsblk | grep -a '^[^l][a-z]' | cut -d ' ' -f 1` (removing hard coded)
 - [ ] Add TXT files with Keymaps, Timezone, Lang, etc....in root directory as reference
 
 ### CHANGELOG
+#### 202002.01
+- Change PS4 to PS3 to choose filesystem
+- FSTAB check order on partitions
+- Change for UUID indeed label partitions on FSTAB
 #### 202001.04
 - Added HOME partition
 - Adjust for all CHROOT commands on the same file
