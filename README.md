@@ -18,7 +18,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - Boot from Void Linux Live Image <sup id="a1">[1](#f1)</sup> and log in as `root` (password `voidlinux`)
 - Install `curl` with `xbps-install -Sy curl`
 - Start installation:
-	- a. Without customizations: `bash -c "$(curl -L git.io/void-musl.sh)"`
+	- a. Without customizations: `bash <(curl -L git.io/void-musl.sh)`
 	- b. With customizations: `curl -LO git.io/void-musl.sh`
 		- Edit the header of `void-musl.sh` file to your taste (using `vi` for example)
 		- Make it executable with `chmod +x void-musl.sh`
@@ -35,6 +35,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 	- In Arch x86_64
 	- <sup id="f1">1</sup> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
 		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.`
+- Use 512MB for EFISIZE should be sufficient to host 7 to 8 kernel versions (only 100MB do not work for another full kernel upgrade)
 - The installation process running about 12 min in VirtualBox with SATA storage
 
 ### TODO
