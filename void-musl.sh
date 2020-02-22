@@ -32,9 +32,8 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 # SWAP=1 # 1=On, 0=Off
 
 # PARTITIONS SIZE (M for Megabytes, G for Gigabytes)
-EFISIZE='100M'
+EFISIZE='512M' # 512MB for /boot/efi should be sufficient to host 7 to 8 kernel versions
 SWAPSIZE='1G'
-# BOOTSIZE='512M' # 512MB for /boot should be sufficient to host 7 to 8 kernel versions
 ROOTSIZE='4G'
 
 # LVM Size ARRAY (testing)
@@ -432,6 +431,7 @@ ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
 ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
+# Create user, set password and add sudo permissions
 useradd -g users -G wheel,storage,audio $USERNAME
 echo ''
 echo 'Define password for user ${USERNAME}'
