@@ -5,7 +5,7 @@
 # First Release: 2019, March
 # Description: Alternative LEAN install script that replaces the standard Void Linux installer.
 # License: MIT
-# Version: 202002.02
+# Version: 202002.03
 
 # Exit immediately if a command exits with a non-zero exit status
 set -e
@@ -63,7 +63,6 @@ setfont $FONT
 echo ''
 echo 'DEVICE SELECTION'
 echo ''
-echo ''
 PS3='Select your device type/name: '
 options=('sda' 'sdb' 'nvme')
 select opt in "${options[@]}"
@@ -91,7 +90,6 @@ clear
 # Option to select the file system type to format paritions
 echo ''
 echo 'FILE SYSTEM TYPE SELECTION'
-echo ''
 echo ''
 PS3='Select the file system type to format partitions: '
 filesystems=('ext3' 'ext4' 'xfs')
@@ -290,7 +288,7 @@ echo ''
 while true; do
   chroot /mnt passwd root && break
   echo 'Password did not match. Please try again'
-  sleep 3s
+  sleep 1s
   echo ''
 done
 
@@ -414,25 +412,32 @@ echo ''
 # Setup the kernel hooks (ignore grup complaints about sdc or similar)
 chroot /mnt xbps-reconfigure -f $KERNEL_VER
 
+clear
+echo ''
+echo '######## SSH ########'
+SSH_SERVER="ln -s /etc/sv/sshd /etc/runit/runsvdir/default/"
+echo ''
+read -p "Enable SSH ? [Y/n]:" answ
+[ "$answ" = "n" ] && SSH_SERVER=""
+
 ### SETUP SYSTEM INFOS START ###
 clear
 echo '######## Setup System Infos ########'
 echo ''
-echo '1. Activate DHCP deamon to enable network connection'
-echo '2. Activate SSH deamon to enable SSH server'
-echo '3. Remove all gettys except for tty1 and tty2'
-echo '4. Create user, set password and add sudo permissions'
-echo '5. Update mirror and sync main repo (best for Brazil)'
-echo '6. Permanent swappiness optimization (great for Linux Desktops)'
-echo '7. Correct the grub install'
-echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
+# Activate DHCP daemon to enable network connection
 ln -s /etc/sv/dhcpcd /etc/runit/runsvdir/default/
-ln -s /etc/sv/sshd /etc/runit/runsvdir/default/
+
+# Activate SSH daemon to enable SSH server
+$SSH_SERVER
+
+# Remove all gettys except for tty1 and tty2
 rm /etc/runit/runsvdir/default/agetty-tty[3456]
 
-# Create user, set password and add sudo permissions
+# Create user
 useradd -g users -G wheel,storage,audio $USERNAME
+
+# Set password
 echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
@@ -440,18 +445,22 @@ echo ''
 while true; do
   passwd $USERNAME && break
   echo 'Password did not match. Please try again'
-  sleep 3s
+  sleep 1s
   echo ''
 done
 
+# Add sudo permissions
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/shutdown, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
+# Update mirror and sync main repo (best for Brazil)
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
 xbps-install -Su
 
+# Permanent swappiness optimization (great for Linux Desktops)
 mkdir /etc/sysctl.d/
 echo 'vm.swappiness=10' > /etc/sysctl.d/99-swappiness.conf
 
+# Correct the grub install
 update-grub
 EOCHROOT
 
