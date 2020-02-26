@@ -62,7 +62,6 @@ setfont $FONT
 # Option to select the device type/name
 echo ''
 echo 'DEVICE SELECTION'
-echo ''
 PS3='Select your device type/name: '
 options=('sda' 'sdb' 'nvme')
 select opt in "${options[@]}"
@@ -90,7 +89,6 @@ clear
 # Option to select the file system type to format paritions
 echo ''
 echo 'FILE SYSTEM TYPE SELECTION'
-echo ''
 PS3='Select the file system type to format partitions: '
 filesystems=('ext3' 'ext4' 'xfs')
 select filesysformat in "${filesystems[@]}"
