@@ -102,13 +102,14 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<-EOF
+  sfdisk $DEVNAME <<EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L
     ,,L
   EOF
+
   # FORMATING
   # In UEFI, format EFI partition as FAT32
   mkfs.vfat -F 32 -n EFI ${DEVNAME}1
@@ -125,7 +126,7 @@ if [ $UEFI ]; then
   mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 else
-  sfdisk $DEVNAME <<-EOFDOS
+  sfdisk $DEVNAME <<EOFDOS
     label: dos
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L,*
@@ -319,6 +320,7 @@ if [ $UEFI ]; then
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
   EOFMUSL
+
 else
   cat > /mnt/etc/fstab <<-EOFBIOS
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
@@ -327,6 +329,7 @@ else
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
   EOFBIOS
+  
 fi
 
 # for FS in $(for key in "${!LV[@]}"; do printf '%s\n' "$key"; done| sort); do
