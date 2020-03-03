@@ -10,9 +10,6 @@
 # Exit immediately if a command exits with a non-zero exit status
 set -e
 
-# Set installation font (more legible)
-setfont $FONT
-
 # Declaring LV array (for LVM)
 # declare -A LV
 
@@ -52,6 +49,9 @@ PKG_LIST='base-system git grub' # Install this packages (add more to your taste)
 ############################
 ######## HEADER END ########
 ############################
+
+# Set installation font (more legible)
+setfont $FONT
 
 clear
 echo '######################################'
@@ -102,13 +102,13 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<-EOF
+  sfdisk $DEVNAME <<-EOFGPT
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L
     ,,L
-  EOF
+  EOFGPT
   # FORMATING
   # In UEFI, format EFI partition as FAT32
   mkfs.vfat -F 32 -n EFI ${DEVNAME}1
@@ -125,12 +125,12 @@ if [ $UEFI ]; then
   mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 else
-  sfdisk $DEVNAME <<-EOF
+  sfdisk $DEVNAME <<-EOFDOS
     label: dos
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L,*
     ,,L
-  EOF
+  EOFDOS
 
   # FORMATING
   mkswap -L swp0 ${DEVNAME}1
@@ -276,13 +276,13 @@ echo ''
 echo 'Customizations'
 echo $HOSTNAME > /mnt/etc/hostname
 
-cat >> /mnt/etc/rc.conf <<-EOF
+cat >> /mnt/etc/rc.conf <<EOFCONF
 HARDWARECLOCK="${HARDWARECLOCK}"
 TIMEZONE="${TIMEZONE}"
 KEYMAP="${KEYMAP}"
 FONT="${FONT}"
 TTYS=2
-EOF
+EOFCONF
 
 ##################################################
 #### GLIBC ONLY - START - USE GLIBC IMAGE ISO ####
@@ -311,22 +311,22 @@ echo 'Generating /etc/fstab'
 echo ''
 
 if [ $UEFI ]; then
-  cat > /mnt/etc/fstab <<-EOF
+  cat > /mnt/etc/fstab <<-EOFMUSL
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
-  EOF
+  EOFMUSL
 else
-  cat > /mnt/etc/fstab <<-EOF
+  cat > /mnt/etc/fstab <<-EOFBIOS
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
-  EOF
+  EOFBIOS
 fi
 
 # for FS in $(for key in "${!LV[@]}"; do printf '%s\n' "$key"; done| sort); do
