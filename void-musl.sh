@@ -74,6 +74,21 @@ do
 done
 clear
 
+# Option to select the device type/name
+echo ''
+echo '====== DEVICE SELECTION NEEEEW ==============='
+echo ''
+PS3='Select your device type/name: '
+options=($(lsblk | awk -F ' ' -v q="'" 'BEGIN { ORS=" " }; /disk/ { print q$1q }'))
+select opt in "${options[@]}"
+do
+  case $opt in
+    $(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;" }')
+    *) echo 'This option is invalid.' ;;
+  esac
+done
+clear
+
 # Option to select the file system type to format paritions
 echo ''
 echo 'FILE SYSTEM TYPE SELECTION'
@@ -263,8 +278,6 @@ echo ''
 # create the password for the root user
 while true; do
   chroot /mnt passwd root && break
-#  echo 'Password did not match. Please try again'
-#  sleep 1s
   echo ''
 done
 
@@ -414,8 +427,6 @@ echo ''
 
 while true; do
   passwd $USERNAME && break
-#  echo 'Password did not match. Please try again'
-#  sleep 1s
   echo ''
 done
 
