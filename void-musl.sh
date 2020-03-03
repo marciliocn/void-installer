@@ -10,11 +10,8 @@
 # Exit immediately if a command exits with a non-zero exit status
 set -e
 
-clear
-echo '######################################'
-echo '######## Void Linux Installer ########'
-echo '######################################'
-echo ''
+# Set installation font (more legible)
+setfont $FONT
 
 # Declaring LV array (for LVM)
 # declare -A LV
@@ -24,12 +21,13 @@ echo ''
 ##############################
 # DECLARE CONSTANTS AND VARIABLES
 UEFI=0 # 1=UEFI, 0=Legacy/BIOS platform along the script
+WIPE=0 # 1=ON, 0=OFF
+# SWAP=1 # 1=ON, 0=OFF
 # REPO="http://alpha.us.repo.voidlinux.org"
 REPO='http://mirror.clarkson.edu/voidlinux'
 # VGNAME="vgpool"
 # CRYPTSETUP_OPTS=""
 # UPDATETYPE='-Sy' # If GenuineIntel update local repository and change the next one to only '-y'
-# SWAP=1 # 1=On, 0=Off
 
 # PARTITIONS SIZE (M for Megabytes, G for Gigabytes)
 EFISIZE='512M' # 512MB for /boot/efi should be sufficient to host 7 to 8 kernel versions
@@ -51,17 +49,19 @@ FONT='Lat2-Terminus16' # Set type face for terminal before X server starts
 TTYS=2 # Amount of ttys which should be setup
 # LANG='en_US.UTF-8' # I guess this one only necessary in glibc installs
 PKG_LIST='base-system git grub' # Install this packages (add more to your taste)
-# Tip: In this step, python3 is a dependency from ufw...no need to install this otherwise
 ############################
 ######## HEADER END ########
 ############################
 
-# Set installation font (more legible)
-setfont $FONT
+clear
+echo '######################################'
+echo '######## Void Linux Installer ########'
+echo '######################################'
 
 # Option to select the device type/name
 echo ''
 echo 'DEVICE SELECTION'
+echo ''
 PS3='Select your device type/name: '
 options=('sda' 'sdb' 'nvme')
 select opt in "${options[@]}"
@@ -89,6 +89,7 @@ clear
 # Option to select the file system type to format paritions
 echo ''
 echo 'FILE SYSTEM TYPE SELECTION'
+echo ''
 PS3='Select the file system type to format partitions: '
 filesystems=('ext3' 'ext4' 'xfs')
 select filesysformat in "${filesystems[@]}"
@@ -112,54 +113,57 @@ do
   esac
 done
 clear
-# Wipe /dev/${DEVNAME} (return this and test when the installation process is working)
-#dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
+
+# Wipe /dev/${DEVNAME} (Wiping a disk is done by writing new data over every single bit - font: https://wiki.archlinux.org/index.php/Securely_wipe_disk)
+[ $WIPE ] && dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
 
 # Detect if we're in UEFI or legacy mode installation
 [ -d /sys/firmware/efi ] && UEFI=1
 
-###### PARTITIONS - START ######
-# Device Paritioning for UEFI/GPT or BIOS/MBR
-# if [ $UEFI ]; then
-#   sfdisk $DEVNAME <<-EOF
-#     label: gpt
-#     ,$EFISIZE,U,*
-#     ,$SWAPSIZE,S
-#     ,$BOOTSIZE,L
-#     ,$ROOTSIZE,L
-#     ,,L
-#   EOF
-# else
-#   sfdisk $DEVNAME <<-EOF
-#     label: dos
-#     ,$SWAPSIZE,S
-#     ,$BOOTSIZE,L,*
-#     ,,L
-#   EOF
-# fi
+###### DISK PREPARATION - START ######
+# Device Partioning for UEFI/GPT or BIOS/MBR
+if [ $UEFI ]; then
+  # PARTITIONING
+  sfdisk $DEVNAME <<-EOF
+    label: gpt
+    ,${EFISIZE},U,*
+    ,${SWAPSIZE},S
+    ,${ROOTSIZE},L
+    ,,L
+  EOF
+  # FORMATING
+  # In UEFI, format EFI partition as FAT32
+  mkfs.vfat -F 32 -n EFI ${DEVNAME}1
+  mkswap -L swp0 ${DEVNAME}2
+  mkfs.$FSYS -L voidlinux ${DEVNAME}3
+  mkfs.$FSYS -L home ${DEVNAME}4
 
-sfdisk $DEVNAME <<EOF
-  label: gpt
-  ,${EFISIZE},U,*
-  ,${SWAPSIZE},S
-  ,${ROOTSIZE},L
-  ,,L
-EOF
-###### PARTITIONS - END ######
+  # MOUNTING
+  mount ${DEVNAME}3 /mnt
+  mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
+  mkdir /mnt/home && mount ${DEVNAME}4 /mnt/home
 
-# FORMATING
-mkfs.vfat -F 32 -n EFI ${DEVNAME}1
-mkswap -L swp0 ${DEVNAME}2
-mkfs.$FSYS -L voidlinux ${DEVNAME}3
-mkfs.$FSYS -L home ${DEVNAME}4
+  # When UEFI
+  mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
-# MOUNTING
-mount ${DEVNAME}3 /mnt
-mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
-mkdir /mnt/home && mount ${DEVNAME}4 /mnt/home
+else
+  sfdisk $DEVNAME <<-EOF
+    label: dos
+    ,${SWAPSIZE},S
+    ,${ROOTSIZE},L,*
+    ,,L
+  EOF
 
-# When UEFI
-mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
+  # FORMATING
+  mkswap -L swp0 ${DEVNAME}1
+  mkfs.$FSYS -L voidlinux ${DEVNAME}2
+  mkfs.$FSYS -L home ${DEVNAME}3
+
+  # MOUNTING
+  mount ${DEVNAME}2 /mnt
+  mkdir /mnt/home && mount ${DEVNAME}3 /mnt/home
+fi
+###### DISK PREPARATION - END ######
 
 ###### LVM AND CRYPTOGRAPHY - START ######
 
@@ -203,12 +207,6 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # #  lvcreate -L ${SWAPSIZE} -n swap ${VGNAME}
 # #fi
 
-# # Format filesystems
-# [ $UEFI ] && mkfs.vfat /dev/${DEVNAME}1
-# #if [ $UEFI ]; then
-# #  mkfs.vfat /dev/${DEVNAME}1
-# #fi
-
 # mkfs.ext4 -L boot /dev/mapper/crypt-boot
 
 # for FS in ${!LV[@]}; do
@@ -218,7 +216,6 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 # if [ $SWAP -eq 1 ]; then
 #   mkswap -L swap /dev/mapper/${VGNAME}-swap
 # fi
-
 
 # # Mount them
 # mount /dev/mapper/${VGNAME}-root /mnt
@@ -247,7 +244,7 @@ mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 #   mount -o bind /${fs} /mnt/${fs}
 # done
 
-# # ?????????
+# # ????????? Será que é a forma de autocofirmar importação de chave no primeiro update do sistema? Consultar um sistema que está instalado
 # mkdir -p /mnt/var/db/xbps/keys/
 # cp -a /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 
@@ -271,9 +268,9 @@ mount -o bind /dev /mnt/dev
 mount -t devpts pts /mnt/dev/pts
 
 # Copy DNS file - DO NOT WORKING
-# cp -L /etc/resolv.conf /mnt/etc/
-# For notebooks: added DNSs below in /etc/resolv.conf (because the notbook do not always is on the same router) 
-# printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' > /mnt/etc/resolv.conf
+cp -L /etc/resolv.conf /mnt/etc/
+# For notebooks: added DNSs below in /etc/resolv.conf (because notebooks do not always is on the same router/network) 
+printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >> /mnt/etc/resolv.conf
 
 ######################
 ### CHROOTed START ###
@@ -285,8 +282,8 @@ echo ''
 # create the password for the root user
 while true; do
   chroot /mnt passwd root && break
-  echo 'Password did not match. Please try again'
-  sleep 1s
+#  echo 'Password did not match. Please try again'
+#  sleep 1s
   echo ''
 done
 
@@ -329,48 +326,41 @@ EOF
 #### GLIBC ONLY - END ####
 ##########################
 
+# FSTAB - START ==========
 clear
 echo ''
 echo 'Generating /etc/fstab'
-###############################
-#### FSTAB ENTRIES - START ####
-###############################
-# For reference: <file system> <dir> <type> <options> <dump> <pass>
-cat > /mnt/etc/fstab <<EOF
-tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-$(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
-$(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
-$(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
-$(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
-EOF
+echo ''
 
-# For a removable drive I include the line:
-# LABEL=volume  /media/blahblah xfs rw,relatime,nofail 0 0
-# The important setting here is ***nofail***.
-#############################
-#### FSTAB ENTRIES - END ####
-#############################
-
-# echo "LABEL=root  /       ext4    rw,relatime,data=ordered,discard    0 0" > /mnt/etc/fstab
-# echo "LABEL=boot  /boot   ext4    rw,relatime,data=ordered,discard    0 0" >> /mnt/etc/fstab
+if [ $UEFI ]; then
+  cat > /mnt/etc/fstab <<-EOF
+  # For reference: <file system> <dir> <type> <options> <dump> <pass>
+  tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
+  $(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+  $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+  $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+  $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+  EOF
+else
+  cat > /mnt/etc/fstab <<-EOF
+  # For reference: <file system> <dir> <type> <options> <dump> <pass>
+  tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
+  $(blkid ${DEVNAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+  $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+  $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+  EOF
+fi
 
 # for FS in $(for key in "${!LV[@]}"; do printf '%s\n' "$key"; done| sort); do
 #   echo "LABEL=${FS/\//_}  /${FS}	ext4    rw,relatime,data=ordered,discard    0 0" >> /mnt/etc/fstab
 # done
-
-# echo "tmpfs       /tmp    tmpfs   size=1G,noexec,nodev,nosuid     0 0" >> /mnt/etc/fstab
-
-# Write on FSTAB if is an UEFI installation
-# [ $UEFI ] && echo "/dev/${DEVNAME}1   /boot/efi   vfat    defaults    0 0" >> /mnt/etc/fstab
-#if [ $UEFI ]; then
-#  echo "/dev/${DEVNAME}1   /boot/efi   vfat    defaults    0 0" >> /mnt/etc/fstab
-#fi
 
 # Write on FSTAB if SWAP partition exist
 # [ $SWAP -eq 1 ] && echo "LABEL=swap  none       swap     defaults    0 0" >> /mnt/etc/fstab
 #if [ $SWAP -eq 1 ]; then
 #  echo "LABEL=swap  none       swap     defaults    0 0" >> /mnt/etc/fstab
 #fi
+# FSTAB - END ==========
 
 # Install GRUB
 # cat << EOF >> /mnt/etc/default/grub
@@ -420,6 +410,7 @@ read -p "Enable SSH ? [Y/n]:" answ
 
 ### SETUP SYSTEM INFOS START ###
 clear
+echo ''
 echo '######## Setup System Infos ########'
 echo ''
 cat > /mnt/tmp/bootstrap.sh <<EOCHROOT
@@ -442,8 +433,8 @@ echo ''
 
 while true; do
   passwd $USERNAME && break
-  echo 'Password did not match. Please try again'
-  sleep 1s
+#  echo 'Password did not match. Please try again'
+#  sleep 1s
   echo ''
 done
 
