@@ -67,21 +67,10 @@ options=('sda' 'sdb' 'nvme')
 select opt in "${options[@]}"
 do
   case $opt in
-    'sda')
-      DEVNAME='/dev/sda'
-      break
-      ;;
-    'sdb')
-      DEVNAME='/dev/sdb'
-      break
-      ;;
-    'nvme')
-      DEVNAME='/dev/nvme'
-      break
-      ;;
-    *)
-      echo 'This option is invalid.'
-      ;;
+    'sda') DEVNAME='/dev/sda' && break ;;
+    'sdb') DEVNAME='/dev/sdb' && break ;;
+    'nvme') DEVNAME='/dev/nvme0n' && break ;;
+    *) echo 'This option is invalid.' ;;
   esac
 done
 clear
@@ -95,27 +84,16 @@ filesystems=('ext3' 'ext4' 'xfs')
 select filesysformat in "${filesystems[@]}"
 do
   case $filesysformat in
-    'ext3')
-      FSYS='ext3'
-      break
-      ;;
-    'ext4')
-      FSYS='ext4'
-      break
-      ;;
-    'xfs')
-      FSYS='xfs'
-      break
-      ;;
-    *)
-      echo 'This option is invalid.'
-      ;;
+    'ext3') FSYS='ext3' && break ;;
+    'ext4') FSYS='ext4' && break ;;
+    'xfs') FSYS='xfs' && break ;;
+    *) echo 'This option is invalid.' ;;
   esac
 done
 clear
 
 # Wipe /dev/${DEVNAME} (Wiping a disk is done by writing new data over every single bit - font: https://wiki.archlinux.org/index.php/Securely_wipe_disk)
-[ $WIPE ] && dd if=/dev/zero of=/dev/${DEVNAME} bs=1M count=100
+[ $WIPE -eq 1 ] && dd if=/dev/zero of=${DEVNAME} bs=1M count=100
 
 # Detect if we're in UEFI or legacy mode installation
 [ -d /sys/firmware/efi ] && UEFI=1
@@ -463,7 +441,7 @@ chroot /mnt /bin/sh /tmp/bootstrap.sh
 # Bugfix for EFI installations (after finished, poweroff e poweron, the system do not start)
 [ $UEFI ] && install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
 
-# Umount folder used for instllation
+# Umount folder used for installation
 umount -R /mnt
 
 clear
