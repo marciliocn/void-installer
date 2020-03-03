@@ -102,7 +102,7 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<EOF
+  sfdisk $DEVNAME <<-EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
@@ -329,7 +329,7 @@ else
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
   EOFBIOS
-  
+
 fi
 
 # for FS in $(for key in "${!LV[@]}"; do printf '%s\n' "$key"; done| sort); do
