@@ -102,7 +102,7 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<EOF
+  sfdisk $DEVNAME <<-EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
@@ -125,7 +125,7 @@ if [ $UEFI ]; then
   mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
 
 else
-  sfdisk $DEVNAME <<EOF
+  sfdisk $DEVNAME <<-EOF
     label: dos
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L,*
@@ -276,7 +276,7 @@ echo ''
 echo 'Customizations'
 echo $HOSTNAME > /mnt/etc/hostname
 
-cat >> /mnt/etc/rc.conf <<EOF
+cat >> /mnt/etc/rc.conf <<-EOF
 HARDWARECLOCK="${HARDWARECLOCK}"
 TIMEZONE="${TIMEZONE}"
 KEYMAP="${KEYMAP}"
@@ -311,7 +311,7 @@ echo 'Generating /etc/fstab'
 echo ''
 
 if [ $UEFI ]; then
-  cat > /mnt/etc/fstab <<EOF
+  cat > /mnt/etc/fstab <<-EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
@@ -320,7 +320,7 @@ if [ $UEFI ]; then
   $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
   EOF
 else
-  cat > /mnt/etc/fstab <<EOF
+  cat > /mnt/etc/fstab <<-EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
