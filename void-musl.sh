@@ -102,14 +102,13 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<-EOF
+  sfdisk $DEVNAME <<EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L
     ,,L
-  EOF
-
+EOF
   # FORMATING
   # In UEFI, format EFI partition as FAT32
   mkfs.vfat -F 32 -n EFI ${DEVNAME}1
@@ -124,15 +123,13 @@ if [ $UEFI ]; then
 
   # When UEFI
   mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
-
 else
-  sfdisk $DEVNAME <<EOFDOS
+  sfdisk $DEVNAME <<EOF
     label: dos
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L,*
     ,,L
-  EOFDOS
-
+EOF
   # FORMATING
   mkswap -L swp0 ${DEVNAME}1
   mkfs.$FSYS -L voidlinux ${DEVNAME}2
@@ -277,13 +274,13 @@ echo ''
 echo 'Customizations'
 echo $HOSTNAME > /mnt/etc/hostname
 
-cat >> /mnt/etc/rc.conf <<EOFCONF
+cat >> /mnt/etc/rc.conf <<EOF
 HARDWARECLOCK="${HARDWARECLOCK}"
 TIMEZONE="${TIMEZONE}"
 KEYMAP="${KEYMAP}"
 FONT="${FONT}"
 TTYS=2
-EOFCONF
+EOF
 
 ##################################################
 #### GLIBC ONLY - START - USE GLIBC IMAGE ISO ####
@@ -312,24 +309,22 @@ echo 'Generating /etc/fstab'
 echo ''
 
 if [ $UEFI ]; then
-  cat > /mnt/etc/fstab <<-EOFMUSL
+  cat > /mnt/etc/fstab <<EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
-  EOFMUSL
-
+EOF
 else
-  cat > /mnt/etc/fstab <<-EOFBIOS
+  cat > /mnt/etc/fstab <<EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
   $(blkid ${DEVNAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
   $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
   $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
-  EOFBIOS
-
+EOF
 fi
 
 # for FS in $(for key in "${!LV[@]}"; do printf '%s\n' "$key"; done| sort); do
