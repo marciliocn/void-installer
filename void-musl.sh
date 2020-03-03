@@ -141,6 +141,10 @@ EOF
 fi
 ###### DISK PREPARATION - END ######
 
+# Allow automatic import repository keys
+mkdir -p /mnt/var/db/xbps/keys/
+cp -a /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
+
 ###### LVM AND CRYPTOGRAPHY - START ######
 
 # # Options for encrypt partitions process
@@ -219,10 +223,6 @@ fi
 # for fs in dev proc sys; do
 #   mount -o bind /${fs} /mnt/${fs}
 # done
-
-# # ????????? Será que é a forma de autocofirmar importação de chave no primeiro update do sistema? Consultar um sistema que está instalado
-# mkdir -p /mnt/var/db/xbps/keys/
-# cp -a /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 
 ###### LVM AND CRYPTOGRAPHY - END ######
 
