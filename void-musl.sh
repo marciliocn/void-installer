@@ -102,13 +102,13 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<EOFGPT
+  sfdisk $DEVNAME <<-EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L
     ,,L
-  EOFGPT
+  EOF
   # FORMATING
   # In UEFI, format EFI partition as FAT32
   mkfs.vfat -F 32 -n EFI ${DEVNAME}1
