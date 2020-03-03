@@ -5,7 +5,7 @@
 # First Release: 2019, March
 # Description: Alternative LEAN install script that replaces the standard Void Linux installer.
 # License: MIT
-# Version: 202002.03
+# Version: 202003.01
 
 # Exit immediately if a command exits with a non-zero exit status
 set -e
@@ -18,7 +18,6 @@ set -e
 ##############################
 # DECLARE CONSTANTS AND VARIABLES
 UEFI=0 # 1=UEFI, 0=Legacy/BIOS platform along the script
-WIPE=0 # 1=ON, 0=OFF
 # SWAP=1 # 1=ON, 0=OFF
 # REPO="http://alpha.us.repo.voidlinux.org"
 REPO='http://mirror.clarkson.edu/voidlinux'
@@ -90,17 +89,23 @@ do
     *) echo 'This option is invalid.' ;;
   esac
 done
-clear
 
+clear
+echo ''
+echo '######## WIPE DISK ########'
+wipe="dd if=/dev/zero of=${DEVNAME} bs=1M count=100"
+echo ''
+read -p "Wipe Disk ? [Y/n]:" answ
+[ "$answ" = "n" ] && wipe=""
 # Wipe /dev/${DEVNAME} (Wiping a disk is done by writing new data over every single bit - font: https://wiki.archlinux.org/index.php/Securely_wipe_disk)
-[ $WIPE -eq 1 ] && dd if=/dev/zero of=${DEVNAME} bs=1M count=100
+$wipe
 
 # Detect if we're in UEFI or legacy mode installation
 [ -d /sys/firmware/efi ] && UEFI=1
 
 ###### DISK PREPARATION - START ######
 # Device Partioning for UEFI/GPT or BIOS/MBR
-if [ $UEFI ]; then
+if [ $UEFI -eq 1 ]; then
   # PARTITIONING
   sfdisk $DEVNAME <<EOF
     label: gpt
@@ -228,7 +233,7 @@ cp -a /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 
 ###### PREPARING VOID LINUX INSTALLING PACKAGES ######
 # If UEFI installation, add GRUB specific package
-[ $UEFI ] && PKG_LIST+='-x86_64-efi'
+[ $UEFI -eq 1 ] && PKG_LIST+='-x86_64-efi'
 
 # Install Void Linux
 clear
@@ -244,9 +249,9 @@ mount -o bind /dev /mnt/dev
 mount -t devpts pts /mnt/dev/pts
 
 # Copy DNS file - DO NOT WORKING
-cp -L /etc/resolv.conf /mnt/etc/
+#cp -L /etc/resolv.conf /mnt/etc/
 # For notebooks: added DNSs below in /etc/resolv.conf (because notebooks do not always is on the same router/network) 
-printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >> /mnt/etc/resolv.conf
+#printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >> /mnt/etc/resolv.conf
 
 ######################
 ### CHROOTed START ###
@@ -308,7 +313,7 @@ echo ''
 echo 'Generating /etc/fstab'
 echo ''
 
-if [ $UEFI ]; then
+if [ $UEFI -eq 1 ]; then
   cat > /mnt/etc/fstab <<EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
@@ -437,7 +442,7 @@ chroot /mnt /bin/sh /tmp/bootstrap.sh
 # grub-install $DEV
 
 # Bugfix for EFI installations (after finished, poweroff e poweron, the system do not start)
-[ $UEFI ] && install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
+[ $UEFI -eq 1 ] && install -D /mnt/boot/efi/EFI/void/grubx64.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi
 
 # Umount folder used for installation
 umount -R /mnt
