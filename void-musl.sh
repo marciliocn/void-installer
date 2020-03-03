@@ -102,7 +102,7 @@ clear
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<-EOFGPT
+  sfdisk $DEVNAME <<EOFGPT
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
