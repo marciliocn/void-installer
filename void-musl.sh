@@ -78,12 +78,14 @@ clear
 echo ''
 echo '====== DEVICE SELECTION NEEEEW ==============='
 echo ''
+dev_options=$(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;" }')
+
 PS3='Select your device type/name: '
 options=($(lsblk | awk -F ' ' -v q="'" 'BEGIN { ORS=" " }; /disk/ { print q$1q }'))
 select opt in "${options[@]}"
 do
   case $opt in
-    $(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;\n" }')
+    $dev_options
     *) echo 'This option is invalid.' ;;
   esac
 done
