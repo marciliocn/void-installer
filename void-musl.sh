@@ -83,7 +83,7 @@ options=($(lsblk | awk -F ' ' -v q="'" 'BEGIN { ORS=" " }; /disk/ { print q$1q }
 select opt in "${options[@]}"
 do
   case $opt in
-    $(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;" }')
+    $(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;\n" }')
     *) echo 'This option is invalid.' ;;
   esac
 done
