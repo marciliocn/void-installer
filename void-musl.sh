@@ -72,6 +72,9 @@ select opt in $options; do
   fi
 done
 
+# Verify if is a NVMe device, then add 'p' in variable for partitions
+[ $(echo $opt | grep '^nvme') ] && DEVNAME+='p'
+
 # Option to select the file system type to format paritions
 clear
 echo ''
@@ -404,7 +407,6 @@ rm /etc/runit/runsvdir/default/agetty-tty[3456]
 useradd -g users -G wheel,storage,audio $USERNAME
 
 # Set password
-echo ''
 echo 'Define password for user ${USERNAME}'
 echo ''
 
