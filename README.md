@@ -35,8 +35,8 @@ LEAN Installer script as a alternative for default `void-installer`.
 	- In VirtualBox on Intel Core i3-2367M 1.4GHz with 2 cores and RAM with 1024MB
 	- With UEFI MUSL
 	- In Arch x86_64
-	- <sup id="f1">1</sup> [↩](#a1) With `void-live-x86_64-musl-20190526.iso` live image
-		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image didn't work: after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.` (Edit: necessary update `xbps` and `libressl` packages before any step)
+	- <sup id="f1">1</sup> [↩](#a1) Recomendation: use the last live image (today is the published in `20191109`)
+		> `void-live-x86_64-musl-20191109[-lxqt].iso` live image can not work: i.e. after `xbps-install -Sy curl`, show the message `Transaction aborted due to unresolved dependencies.` **(Edit: necessary update `xbps` and `libressl` packages before any step)**
 - Use 512MB for EFISIZE should be sufficient to host 7 to 8 kernel versions (only 100MB do not work for another full kernel upgrade)
 - The installation process running about 12 min in VirtualBox with SATA storage
 
