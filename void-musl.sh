@@ -61,50 +61,31 @@ echo '######################################'
 echo ''
 echo 'DEVICE SELECTION'
 echo ''
-PS3='Select your device type/name: '
-options=('sda' 'sdb' 'nvme')
-select opt in "${options[@]}"
-do
-  case $opt in
-    'sda') DEVNAME='/dev/sda' && break ;;
-    'sdb') DEVNAME='/dev/sdb' && break ;;
-    'nvme') DEVNAME='/dev/nvme0n' && break ;;
-    *) echo 'This option is invalid.' ;;
-  esac
+PS3='Select your device (type the number option): '
+options=$(lsblk | awk '/disk/ { print $1 }')
+select opt in $options; do
+  if [ ! -z $opt ]; then
+    DEVNAME="/dev/${opt}"
+    break
+  else  
+    printf 'This option is invalid.\n\n'
+  fi
 done
-clear
-
-# Option to select the device type/name
-echo ''
-echo '====== DEVICE SELECTION NEEEEW ==============='
-echo ''
-dev_options=$(lsblk | awk -F ' ' -v q="'" '/disk/ { print q$1q") DEVNAME="q"/dev/"$1q" && break ;;" }')
-
-PS3='Select your device type/name: '
-options=($(lsblk | awk -F ' ' -v q="'" 'BEGIN { ORS=" " }; /disk/ { print q$1q }'))
-select opt in "${options[@]}"
-do
-  case $opt in
-    $dev_options
-    *) echo 'This option is invalid.' ;;
-  esac
-done
-clear
 
 # Option to select the file system type to format paritions
+clear
 echo ''
 echo 'FILE SYSTEM TYPE SELECTION'
 echo ''
-PS3='Select the file system type to format partitions: '
-filesystems=('ext3' 'ext4' 'xfs')
-select filesysformat in "${filesystems[@]}"
-do
-  case $filesysformat in
-    'ext3') FSYS='ext3' && break ;;
-    'ext4') FSYS='ext4' && break ;;
-    'xfs') FSYS='xfs' && break ;;
-    *) echo 'This option is invalid.' ;;
-  esac
+PS3='Select the file system type to format partitions (type the number option): '
+filesystems='ext2 ext3 ext4 xfs'
+select filesysformat in $filesystems; do
+  if [ ! -z $filesysformat ]; then
+    FSYS=$filesysformat
+    break
+  else  
+    printf 'This option is invalid.\n\n'
+  fi
 done
 
 clear
