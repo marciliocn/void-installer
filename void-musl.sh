@@ -65,7 +65,8 @@ PS3='Select your device (type the number option): '
 options=$(lsblk | awk '/disk/ { print $1 }')
 select opt in $options; do
   if [ ! -z $opt ]; then
-    DEVNAME="/dev/${opt}"
+    DEV_DISK_NAME="/dev/${opt}"
+    DEV_PART_NAME="/dev/${opt}"
     break
   else  
     printf 'This option is invalid.\n\n'
@@ -73,7 +74,7 @@ select opt in $options; do
 done
 
 # Verify if is a NVMe device, then add 'p' in variable for partitions
-[ $(echo $opt | grep '^nvme') ] && DEVNAME+='p'
+[ $(echo $opt | grep '^nvme') ] && DEV_PART_NAME+='p'
 
 # Option to select the file system type to format paritions
 clear
@@ -94,7 +95,7 @@ done
 clear
 echo ''
 echo '######## WIPE DISK ########'
-wipe="dd if=/dev/zero of=${DEVNAME} bs=1M count=100"
+wipe="dd if=/dev/zero of=${DEV_DISK_NAME} bs=1M count=100"
 echo ''
 read -p "Wipe Disk ? [Y/n]:" answ
 [ "$answ" = "n" ] && wipe=""
@@ -108,7 +109,7 @@ $wipe
 # Device Partioning for UEFI/GPT or BIOS/MBR
 if [ $UEFI -eq 1 ]; then
   # PARTITIONING
-  sfdisk $DEVNAME <<EOF
+  sfdisk $DEV_DISK_NAME <<EOF
     label: gpt
     ,${EFISIZE},U,*
     ,${SWAPSIZE},S
@@ -117,33 +118,33 @@ if [ $UEFI -eq 1 ]; then
 EOF
   # FORMATING
   # In UEFI, format EFI partition as FAT32
-  mkfs.vfat -F 32 -n EFI ${DEVNAME}1
-  mkswap -L swp0 ${DEVNAME}2
-  mkfs.$FSYS -L voidlinux ${DEVNAME}3
-  mkfs.$FSYS -L home ${DEVNAME}4
+  mkfs.vfat -F 32 -n EFI ${DEV_PART_NAME}1
+  mkswap -L swp0 ${DEV_PART_NAME}2
+  mkfs.$FSYS -L voidlinux ${DEV_PART_NAME}3
+  mkfs.$FSYS -L home ${DEV_PART_NAME}4
 
   # MOUNTING
-  mount ${DEVNAME}3 /mnt
-  mkdir /mnt/boot && mount ${DEVNAME}1 /mnt/boot
-  mkdir /mnt/home && mount ${DEVNAME}4 /mnt/home
+  mount ${DEV_PART_NAME}3 /mnt
+  mkdir /mnt/boot && mount ${DEV_PART_NAME}1 /mnt/boot
+  mkdir /mnt/home && mount ${DEV_PART_NAME}4 /mnt/home
 
   # When UEFI
-  mkdir /mnt/boot/efi && mount ${DEVNAME}1 /mnt/boot/efi
+  mkdir /mnt/boot/efi && mount ${DEV_PART_NAME}1 /mnt/boot/efi
 else
-  sfdisk $DEVNAME <<EOF
+  sfdisk $DEV_DISK_NAME <<EOF
     label: dos
     ,${SWAPSIZE},S
     ,${ROOTSIZE},L,*
     ,,L
 EOF
   # FORMATING
-  mkswap -L swp0 ${DEVNAME}1
-  mkfs.$FSYS -L voidlinux ${DEVNAME}2
-  mkfs.$FSYS -L home ${DEVNAME}3
+  mkswap -L swp0 ${DEV_PART_NAME}1
+  mkfs.$FSYS -L voidlinux ${DEV_PART_NAME}2
+  mkfs.$FSYS -L home ${DEV_PART_NAME}3
 
   # MOUNTING
-  mount ${DEVNAME}2 /mnt
-  mkdir /mnt/home && mount ${DEVNAME}3 /mnt/home
+  mount ${DEV_PART_NAME}2 /mnt
+  mkdir /mnt/home && mount ${DEV_PART_NAME}3 /mnt/home
 fi
 ###### DISK PREPARATION - END ######
 
@@ -316,18 +317,18 @@ if [ $UEFI -eq 1 ]; then
   cat > /mnt/etc/fstab <<EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-  $(blkid ${DEVNAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
-  $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
-  $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
-  $(blkid ${DEVNAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+  $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+  $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+  $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+  $(blkid ${DEV_PART_NAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
 EOF
 else
   cat > /mnt/etc/fstab <<EOF
   # For reference: <file system> <dir> <type> <options> <dump> <pass>
   tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-  $(blkid ${DEVNAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
-  $(blkid ${DEVNAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
-  $(blkid ${DEVNAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+  $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+  $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+  $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
 EOF
 fi
 
@@ -360,7 +361,7 @@ echo ''
 echo 'Install GRUB'
 echo ''
 # Install GRUB to the disk
-chroot /mnt grub-install $DEVNAME
+chroot /mnt grub-install $DEV_DISK_NAME
 
 # clear
 # echo "Configurar GRUB"
