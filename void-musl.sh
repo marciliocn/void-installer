@@ -250,11 +250,6 @@ mount -t sysfs sys /mnt/sys
 mount -o bind /dev /mnt/dev
 mount -t devpts pts /mnt/dev/pts
 
-# Copy DNS file - DO NOT WORKING
-#cp -L /etc/resolv.conf /mnt/etc/
-# For notebooks: added DNSs below in /etc/resolv.conf (because notebooks do not always is on the same router/network) 
-#printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >> /mnt/etc/resolv.conf
-
 ######################
 ### CHROOTed START ###
 ######################
@@ -315,20 +310,20 @@ echo ''
 
 if [ $UEFI -eq 1 ]; then
   cat > /mnt/etc/fstab <<EOF
-  # For reference: <file system> <dir> <type> <options> <dump> <pass>
-  tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-  $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
-  $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
-  $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
-  $(blkid ${DEV_PART_NAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+# For reference: <file system> <dir> <type> <options> <dump> <pass>
+# tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0 (enable if necessary - I checked `df -h` and there is 3 tmpfs mounted)
+$(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
+$(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+$(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+$(blkid ${DEV_PART_NAME}4 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
 EOF
 else
   cat > /mnt/etc/fstab <<EOF
-  # For reference: <file system> <dir> <type> <options> <dump> <pass>
-  tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
-  $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
-  $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
-  $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
+# For reference: <file system> <dir> <type> <options> <dump> <pass>
+# tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0 (enable if necessary - I checked `df -h` and there is 3 tmpfs mounted)
+$(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
+$(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
+$(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
 EOF
 fi
 
