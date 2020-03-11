@@ -28,7 +28,7 @@ REPO='http://mirror.clarkson.edu/voidlinux'
 # PARTITIONS SIZE (M for Megabytes, G for Gigabytes)
 EFISIZE='512M' # 512MB for /boot/efi should be sufficient to host 7 to 8 kernel versions
 SWAPSIZE='1G'
-ROOTSIZE='4G'
+ROOTSIZE='6G'
 
 # LVM Size ARRAY (testing)
 # LV[root]="2G"
@@ -311,7 +311,7 @@ echo ''
 if [ $UEFI -eq 1 ]; then
   cat > /mnt/etc/fstab <<EOF
 # For reference: <file system> <dir> <type> <options> <dump> <pass>
-# tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0 (enable if necessary - I checked `df -h` and there is 3 tmpfs mounted)
+tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
 $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 4 | tr -d '"') /boot vfat  rw,fmask=0133,dmask=0022,noatime,discard  0 2
 $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
 $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
@@ -320,7 +320,7 @@ EOF
 else
   cat > /mnt/etc/fstab <<EOF
 # For reference: <file system> <dir> <type> <options> <dump> <pass>
-# tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0 (enable if necessary - I checked `df -h` and there is 3 tmpfs mounted)
+tmpfs /tmp  tmpfs defaults,nosuid,nodev 0 0
 $(blkid ${DEV_PART_NAME}1 | cut -d ' ' -f 3 | tr -d '"') swap  swap  commit=60,barrier=0  0 0
 $(blkid ${DEV_PART_NAME}2 | cut -d ' ' -f 3 | tr -d '"') / $FSYS rw,noatime,discard,commit=60,barrier=0 0 1
 $(blkid ${DEV_PART_NAME}3 | cut -d ' ' -f 3 | tr -d '"') /home $FSYS rw,discard,commit=60,barrier=0 0 2
