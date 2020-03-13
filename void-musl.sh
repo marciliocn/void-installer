@@ -414,8 +414,9 @@ done
 # Add sudo permissions
 echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin/reboot, /usr/bin/zzz, /usr/bin/ZZZ, /usr/bin/mount, /usr/bin/umount' > /etc/sudoers.d/99_wheel
 
-# Update mirror (best for Brazil)
+# Update mirrors (best for Brazil)
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
+echo 'repository=${REPO}/current/musl/nonfree' >> /etc/xbps.d/00-repository-main.conf
 
 # Permanent swappiness optimization (great for Linux Desktops)
 mkdir /etc/sysctl.d/
