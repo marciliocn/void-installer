@@ -14,6 +14,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - `sudo poweroff` and `sudo restart` without password
 - Swappiness option enabled (but not working - I guess that is a BUG)
 - Best for Desktops or Notebooks
+- Include `nonfree` repository
 
 ### USAGE
 - Boot from Void Linux Live Image <sup id="a1">[1](#f1)</sup> and log in as `root` (password `voidlinux`)
@@ -69,6 +70,7 @@ LEAN Installer script as a alternative for default `void-installer`.
 - Dynamic device selection (from devices connected)
 - Automatic answer for import keys
 - Installation adapted for MBR/BIOS
+- Added `nonfree` repository
 #### 202002.03
 - Option to enable SSH Server
 #### 202002.02
