@@ -416,7 +416,7 @@ echo '%wheel ALL=(ALL) ALL, NOPASSWD: /usr/bin/halt, /usr/bin/poweroff, /usr/bin
 
 # Update mirrors (best for Brazil)
 echo 'repository=${REPO}/current/musl' > /etc/xbps.d/00-repository-main.conf
-echo 'repository=${REPO}/current/musl/nonfree' >> /etc/xbps.d/00-repository-main.conf
+echo 'repository=${REPO}/current/musl/nonfree' > /etc/xbps.d/10-repository-nonfree.conf
 
 # Permanent swappiness optimization (great for Linux Desktops)
 mkdir /etc/sysctl.d/
